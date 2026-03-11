@@ -17,6 +17,10 @@ import {
 } from "@/lib/hooks/use-proposal-actions";
 import { truncateAddress, explorerUrl } from "@/lib/utils/format";
 import { ProposalState } from "@/lib/utils/proposal-states";
+import {
+  parseProposalDescription,
+  proposalCategoryColors,
+} from "@/lib/utils/proposal-categories";
 import { Info, Clock, Play } from "lucide-react";
 
 export default function ProposalDetailPage({
@@ -58,8 +62,9 @@ export default function ProposalDetailPage({
     );
   }
 
-  const title = proposal.description.split("\n")[0] || "Untitled";
-  const body = proposal.description.split("\n").slice(1).join("\n").trim();
+  const parsed = parseProposalDescription(proposal.description);
+  const title = parsed.title;
+  const body = parsed.body;
   const isActive = state === ProposalState.Active;
   const isSucceeded = state === ProposalState.Succeeded;
   const isQueued = state === ProposalState.Queued;
@@ -88,6 +93,13 @@ export default function ProposalDetailPage({
       <div className="space-y-6">
         <div>
           <div className="flex items-center gap-3">
+            {parsed.category && (
+              <span
+                className={`inline-flex shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${proposalCategoryColors[parsed.category]}`}
+              >
+                {parsed.category}
+              </span>
+            )}
             <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
             {state !== undefined && <ProposalStatus state={state} />}
           </div>

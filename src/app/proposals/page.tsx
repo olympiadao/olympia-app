@@ -8,6 +8,10 @@ import { ProposalStatus } from "@/components/proposals/proposal-status";
 import { useProposals } from "@/lib/hooks/use-proposals";
 import { useProposalState } from "@/lib/hooks/use-proposal-state";
 import { truncateAddress } from "@/lib/utils/format";
+import {
+  parseProposalDescription,
+  proposalCategoryColors,
+} from "@/lib/utils/proposal-categories";
 
 export default function ProposalsPage() {
   const { proposals, isLoading, error } = useProposals();
@@ -127,15 +131,25 @@ function ProposalCard({
   blockNumber: bigint;
 }) {
   const { state } = useProposalState(proposalId);
-  const title = description.split("\n")[0] || "Untitled";
-  const body = description.split("\n").slice(1).join("\n").trim();
+  const parsed = parseProposalDescription(description);
+  const title = parsed.title;
+  const body = parsed.body;
 
   return (
     <Link href={`/proposals/${proposalId.toString()}`}>
       <Card className="transition-colors hover:border-border-brand">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
-            <p className="text-base font-semibold">{title}</p>
+            <div className="flex items-center gap-2">
+              {parsed.category && (
+                <span
+                  className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${proposalCategoryColors[parsed.category]}`}
+                >
+                  {parsed.category}
+                </span>
+              )}
+              <p className="text-base font-semibold">{title}</p>
+            </div>
             {body && (
               <p className="mt-1 line-clamp-2 text-sm text-text-muted">
                 {body}

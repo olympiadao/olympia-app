@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { abis } from "@/lib/contracts/config";
 import { contracts } from "@/lib/contracts/addresses";
 import { Info } from "lucide-react";
+import { PROPOSAL_CATEGORIES } from "@/lib/utils/proposal-categories";
 
 export default function NewProposalPage() {
+  const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [targetAddress, setTargetAddress] = useState("");
@@ -22,9 +24,10 @@ export default function NewProposalPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
+    const prefixedTitle = category ? `[${category}] ${title}` : title;
     const fullDescription = description
-      ? `${title}\n${description}`
-      : title;
+      ? `${prefixedTitle}\n${description}`
+      : prefixedTitle;
 
     // If target + amount provided, encode an executeTreasury call
     if (targetAddress && etcAmount) {
@@ -118,6 +121,29 @@ export default function NewProposalPage() {
           <div className="space-y-4">
             <div>
               <label
+                htmlFor="category"
+                className="mb-1 block text-sm font-medium text-text-secondary"
+              >
+                Category
+              </label>
+              <select
+                id="category"
+                required
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full rounded-lg border border-border-default bg-bg-elevated px-3 py-2 text-sm text-text-primary focus:border-brand-green focus:outline-none"
+              >
+                <option value="">Select a category…</option>
+                {PROPOSAL_CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label} — {c.description}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label
                 htmlFor="title"
                 className="mb-1 block text-sm font-medium text-text-secondary"
               >
@@ -208,7 +234,7 @@ export default function NewProposalPage() {
           type="submit"
           size="lg"
           className="w-full"
-          disabled={!title || isPending || isConfirming}
+          disabled={!category || !title || isPending || isConfirming}
         >
           {isPending || isConfirming ? "Submitting…" : "Submit Proposal"}
         </Button>
