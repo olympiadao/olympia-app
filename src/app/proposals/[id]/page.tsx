@@ -23,6 +23,7 @@ import {
   proposalCategoryColors,
 } from "@/lib/utils/proposal-categories";
 import { Info, Clock, Play } from "lucide-react";
+import Markdown from "react-markdown";
 
 export default function ProposalDetailPage({
   params,
@@ -132,15 +133,15 @@ export default function ProposalDetailPage({
             <CardHeader>
               <CardTitle>Description</CardTitle>
             </CardHeader>
-            <div className="whitespace-pre-wrap text-sm text-text-secondary">
-              {body}
+            <div className="prose prose-sm prose-invert max-w-none text-text-secondary prose-headings:text-text-primary prose-strong:text-text-primary prose-code:rounded prose-code:bg-bg-elevated prose-code:px-1 prose-code:py-0.5 prose-code:text-brand-green prose-pre:bg-bg-elevated prose-a:text-brand-green">
+              <Markdown>{body}</Markdown>
             </div>
           </Card>
         )}
 
         <Card>
           <CardHeader>
-            <CardTitle>Actions</CardTitle>
+            <CardTitle>Treasury Action</CardTitle>
           </CardHeader>
           <div className="space-y-2">
             {proposal.targets.map((target, i) => (
