@@ -15,6 +15,7 @@ import {
   useQueueProposal,
   useExecuteProposal,
 } from "@/lib/hooks/use-proposal-actions";
+import { useTotalMembers } from "@/lib/hooks/use-member-nft";
 import { truncateAddress, explorerUrl } from "@/lib/utils/format";
 import { ProposalState } from "@/lib/utils/proposal-states";
 import {
@@ -34,6 +35,7 @@ export default function ProposalDetailPage({
   const { state } = useProposalState(proposalId);
   const { forVotes, againstVotes, abstainVotes } =
     useProposalVotes(proposalId);
+  const { data: totalSupply } = useTotalMembers();
 
   const {
     queue,
@@ -179,6 +181,7 @@ export default function ProposalDetailPage({
             forVotes={forVotes}
             againstVotes={againstVotes}
             abstainVotes={abstainVotes}
+            totalSupply={totalSupply as bigint | undefined}
           />
         </Card>
 

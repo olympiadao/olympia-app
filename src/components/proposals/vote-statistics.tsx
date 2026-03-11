@@ -4,16 +4,20 @@ interface VoteStatisticsProps {
   forVotes: bigint;
   againstVotes: bigint;
   abstainVotes: bigint;
+  totalSupply?: bigint;
 }
 
 export function VoteStatistics({
   forVotes,
   againstVotes,
   abstainVotes,
+  totalSupply,
 }: VoteStatisticsProps) {
-  const total = forVotes + againstVotes + abstainVotes;
+  const totalVotes = forVotes + againstVotes + abstainVotes;
+  // Percentage of total NFT supply (for quorum context), fallback to votes cast
+  const base = totalSupply && totalSupply > 0n ? totalSupply : totalVotes;
   const pct = (v: bigint) =>
-    total > 0n ? Number((v * 1000n) / total) / 10 : 0;
+    base > 0n ? Number((v * 1000n) / base) / 10 : 0;
 
   const forPct = pct(forVotes);
   const againstPct = pct(againstVotes);
@@ -41,6 +45,12 @@ export function VoteStatistics({
         <VoteLabel label="Against" count={againstVotes} pct={againstPct} className="text-semantic-error" />
         <VoteLabel label="Abstain" count={abstainVotes} pct={abstainPct} className="text-text-subtle" />
       </div>
+
+      {totalSupply !== undefined && (
+        <p className="text-xs text-text-subtle">
+          {totalVotes.toString()} of {totalSupply.toString()} members voted ({base > 0n ? Number((totalVotes * 1000n) / base) / 10 : 0}% turnout)
+        </p>
+      )}
     </div>
   );
 }

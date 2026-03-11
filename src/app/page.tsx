@@ -9,6 +9,10 @@ import { ProposalStatus } from "@/components/proposals/proposal-status";
 import { useProposalState } from "@/lib/hooks/use-proposal-state";
 import Link from "next/link";
 import { ScrollText, Landmark, Users, Info } from "lucide-react";
+import {
+  parseProposalDescription,
+  proposalCategoryColors,
+} from "@/lib/utils/proposal-categories";
 
 export default function Dashboard() {
   const { proposals, isLoading: proposalsLoading } = useProposals();
@@ -157,13 +161,22 @@ function ProposalRow({
   description: string;
 }) {
   const { state } = useProposalState(proposalId);
-  const title = description.split("\n")[0] || "Untitled";
+  const parsed = parseProposalDescription(description);
 
   return (
     <Link href={`/proposals/${proposalId.toString()}`}>
       <Card className="flex items-center justify-between transition-colors hover:border-border-brand">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium">{title}</p>
+          <div className="flex items-center gap-2">
+            {parsed.category && (
+              <span
+                className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${proposalCategoryColors[parsed.category]}`}
+              >
+                {parsed.category}
+              </span>
+            )}
+            <p className="truncate text-sm font-medium">{parsed.title}</p>
+          </div>
           <p className="mt-0.5 font-mono text-xs text-text-subtle">
             #{proposalId.toString().slice(0, 8)}…
           </p>

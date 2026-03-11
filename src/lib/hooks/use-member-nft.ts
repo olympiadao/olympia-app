@@ -29,7 +29,7 @@ export function useTotalMembers() {
   return useReadContract({
     address: contracts[63].memberNFT,
     abi: abis.memberNFT,
-    functionName: "totalMembers",
+    functionName: "totalSupply",
   });
 }
 
