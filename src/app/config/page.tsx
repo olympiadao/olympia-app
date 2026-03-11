@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { contracts } from "@/lib/contracts/addresses";
 import { explorerUrl, truncateAddress } from "@/lib/utils/format";
+import { useBlockStats } from "@/lib/hooks/use-block-stats";
 import {
   Settings2,
   ExternalLink,
@@ -17,38 +18,48 @@ import {
   CheckSquare,
 } from "lucide-react";
 
-const votingParams = [
-  {
-    label: "Voting Delay",
-    value: "1 block (~13s)",
-    description: "Time between proposal creation and voting start",
-  },
-  {
-    label: "Voting Period",
-    value: "100 blocks (~22 min)",
-    description: "Duration of the voting window",
-  },
-  {
-    label: "Quorum",
-    value: "10% of NFT supply",
-    description: "Minimum 'For' votes needed for proposal to pass",
-  },
-  {
-    label: "Late Quorum Extension",
-    value: "50 blocks (~11 min)",
-    description: "If quorum reached late, voting extends by this amount",
-  },
-  {
-    label: "Timelock Delay",
-    value: "3600s (1 hour)",
-    description: "Mandatory waiting period before execution",
-  },
-  {
-    label: "Proposal Threshold",
-    value: "0",
-    description: "Any NFT holder can create a proposal",
-  },
-];
+function getVotingParams(avgBlockTimeMs?: number) {
+  const bt = avgBlockTimeMs ?? 13000;
+  const fmt = (blocks: number) => {
+    const ms = blocks * bt;
+    const sec = Math.round(ms / 1000);
+    if (sec < 120) return `~${sec}s`;
+    return `~${Math.round(sec / 60)} min`;
+  };
+
+  return [
+    {
+      label: "Voting Delay",
+      value: `1 block (${fmt(1)})`,
+      description: "Time between proposal creation and voting start",
+    },
+    {
+      label: "Voting Period",
+      value: `100 blocks (${fmt(100)})`,
+      description: "Duration of the voting window",
+    },
+    {
+      label: "Quorum",
+      value: "10% of NFT supply",
+      description: "Minimum 'For' votes needed for proposal to pass",
+    },
+    {
+      label: "Late Quorum Extension",
+      value: `50 blocks (${fmt(50)})`,
+      description: "If quorum reached late, voting extends by this amount",
+    },
+    {
+      label: "Timelock Delay",
+      value: "3600s (1 hour)",
+      description: "Mandatory waiting period before execution",
+    },
+    {
+      label: "Proposal Threshold",
+      value: "0",
+      description: "Any NFT holder can create a proposal",
+    },
+  ];
+}
 
 const contractGroups = [
   {
@@ -201,26 +212,26 @@ const checklistSections: ChecklistSection[] = [
   },
 ];
 
-const timingSteps = [
-  { step: "Propose → Active", wait: "~13s (1 block)", cumulative: "0 min" },
-  { step: "Vote", wait: "immediate", cumulative: "0 min" },
-  {
-    step: "Active → Succeeded",
-    wait: "~22 min (100 blocks)",
-    cumulative: "22 min",
-  },
-  { step: "Queue", wait: "immediate", cumulative: "22 min" },
-  {
-    step: "Queued → Executable",
-    wait: "60 min (timelock)",
-    cumulative: "82 min",
-  },
-  { step: "Execute", wait: "immediate", cumulative: "82 min" },
-];
+function getTimingSteps(avgBlockTimeMs?: number) {
+  const bt = avgBlockTimeMs ?? 13000;
+  const delayMin = Math.round((1 * bt) / 1000 / 60 * 10) / 10;
+  const voteMin = Math.round((100 * bt) / 1000 / 60);
+  const totalMin = voteMin + 60;
+
+  return [
+    { step: "Propose → Active", wait: `~${Math.round(bt / 1000)}s (1 block)`, cumulative: "0 min" },
+    { step: "Vote", wait: "immediate", cumulative: `${delayMin < 1 ? "< 1" : Math.round(delayMin)} min` },
+    { step: "Active → Succeeded", wait: `~${voteMin} min (100 blocks)`, cumulative: `${voteMin} min` },
+    { step: "Queue", wait: "immediate", cumulative: `${voteMin} min` },
+    { step: "Queued → Executable", wait: "60 min (timelock)", cumulative: `${totalMin} min` },
+    { step: "Execute", wait: "immediate", cumulative: `${totalMin} min` },
+  ];
+}
 
 export default function ConfigPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
+  const { data: blockStats } = useBlockStats();
 
   function copyAddress(address: string) {
     navigator.clipboard.writeText(address);
@@ -268,7 +279,7 @@ export default function ConfigPage() {
           </CardTitle>
         </CardHeader>
         <div className="space-y-3">
-          {votingParams.map((param) => (
+          {getVotingParams(blockStats?.avgBlockTimeMs).map((param) => (
             <div
               key={param.label}
               className="flex items-start justify-between gap-4 rounded-lg border border-border-subtle bg-bg-elevated px-3 py-2"
@@ -366,7 +377,21 @@ export default function ConfigPage() {
             value="rpc.mordor.etccooperative.org"
             mono
           />
-          <InfoRow label="Block Time" value="~13 seconds" />
+          <InfoRow
+            label="Block Time"
+            value={
+              blockStats
+                ? `~${(blockStats.avgBlockTimeMs / 1000).toFixed(1)}s (live)`
+                : "~13 seconds"
+            }
+          />
+          {blockStats && (
+            <InfoRow
+              label="Current Block"
+              value={`#${blockStats.currentBlock.toLocaleString()}`}
+              mono
+            />
+          )}
         </div>
       </Card>
 
@@ -437,7 +462,7 @@ export default function ConfigPage() {
             <span>Wait</span>
             <span>Cumulative</span>
           </div>
-          {timingSteps.map((row) => (
+          {getTimingSteps(blockStats?.avgBlockTimeMs).map((row) => (
             <div
               key={row.step}
               className="grid grid-cols-3 gap-2 py-1.5 text-sm"
@@ -450,7 +475,7 @@ export default function ConfigPage() {
             </div>
           ))}
           <p className="mt-3 text-xs text-text-subtle">
-            Total: ~82 minutes from proposal creation to execution.
+            Total: ~{Math.round((100 * (blockStats?.avgBlockTimeMs ?? 13000)) / 1000 / 60) + 60} minutes from proposal creation to execution.
           </p>
         </div>
       </Card>

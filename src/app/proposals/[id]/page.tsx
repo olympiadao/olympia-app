@@ -10,6 +10,7 @@ import { useProposals } from "@/lib/hooks/use-proposals";
 import {
   useProposalState,
   useProposalVotes,
+  useProposalEta,
 } from "@/lib/hooks/use-proposal-state";
 import {
   useQueueProposal,
@@ -42,6 +43,7 @@ export default function ProposalDetailPage({
   const { state } = useProposalState(proposalId);
   const { forVotes, againstVotes, abstainVotes } =
     useProposalVotes(proposalId);
+  const { eta: proposalEta } = useProposalEta(proposalId);
   const { data: totalSupply } = useTotalMembers();
 
   const { data: blockStats } = useBlockStats();
@@ -135,6 +137,7 @@ export default function ProposalDetailPage({
           state={state}
           voteEnd={proposal.voteEnd}
           blockStats={blockStats}
+          proposalEta={proposalEta}
         />
 
         {body && (
@@ -283,16 +286,20 @@ function StateGuidance({
   state,
   voteEnd,
   blockStats,
+  proposalEta,
 }: {
   state: number | undefined;
   voteEnd: bigint;
   blockStats: { currentBlock: number; avgBlockTimeMs: number } | undefined;
+  proposalEta: bigint | undefined;
 }) {
   if (state === undefined) return null;
 
   const countdown = blockStats
     ? formatCountdownText(voteEnd, blockStats)
     : null;
+
+  const timelockCountdown = formatTimelockCountdown(proposalEta);
 
   const messages: Record<number, { text: string; color: string }> = {
     [ProposalState.Pending]: {
@@ -310,7 +317,9 @@ function StateGuidance({
       color: "text-brand-green",
     },
     [ProposalState.Queued]: {
-      text: "This proposal is in the timelock waiting period (1 hour on Mordor). After the delay passes, it can be executed.",
+      text: timelockCountdown
+        ? `Executable in ~${timelockCountdown}. The Executor will perform a final sanctions check.`
+        : "This proposal is in the timelock waiting period. After the delay passes, it can be executed.",
       color: "text-brand-amber",
     },
     [ProposalState.Executed]: {
@@ -346,10 +355,25 @@ function StateGuidance({
               {voteEnd.toString()}
             </p>
           )}
+          {proposalEta && state === ProposalState.Queued && (
+            <p className="mt-1 font-mono text-xs text-text-subtle">
+              Executable after{" "}
+              {new Date(Number(proposalEta) * 1000).toLocaleString()}
+            </p>
+          )}
         </div>
       </div>
     </Card>
   );
+}
+
+function formatTimelockCountdown(eta: bigint | undefined): string | null {
+  if (!eta || eta === 0n) return null;
+  const nowMs = Date.now();
+  const etaMs = Number(eta) * 1000;
+  const remainingMs = etaMs - nowMs;
+  if (remainingMs <= 0) return "now (ready to execute)";
+  return formatCountdown(remainingMs);
 }
 
 function formatCountdownText(

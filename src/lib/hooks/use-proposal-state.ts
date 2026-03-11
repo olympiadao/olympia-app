@@ -20,6 +20,21 @@ export function useProposalState(proposalId: bigint) {
   };
 }
 
+export function useProposalEta(proposalId: bigint) {
+  const { data, isLoading, error } = useReadContract({
+    address: contracts[63].governor,
+    abi: abis.governor,
+    functionName: "proposalEta",
+    args: [proposalId],
+  });
+
+  return {
+    eta: data as bigint | undefined,
+    isLoading,
+    error,
+  };
+}
+
 export function useProposalVotes(proposalId: bigint) {
   const { data, isLoading, error } = useReadContract({
     address: contracts[63].governor,
