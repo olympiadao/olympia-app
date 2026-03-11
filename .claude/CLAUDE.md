@@ -34,10 +34,19 @@ pnpm test         # Run tests
 - Font: Inter (UI) + JetBrains Mono (code/addresses)
 - Dark-first design, Olympia palette only
 
-## Key Contracts
+## Key Contracts (Mordor Testnet, Chain 63)
 
-- Treasury: `0xd6165F3aF4281037bce810621F62B43077Fb0e37` (Mordor + ETC mainnet)
-- Governor, Executor, SanctionsOracle, ECFPRegistry: TBD (Demo v0.1)
+| Contract | Address |
+|----------|---------|
+| OlympiaGovernor | `0xEdbD61F1cE825CF939beBB422F8C914a69826dDA` |
+| OlympiaExecutor | `0x94d4f74dDdE715Ed195B597A3434713690B14e97` |
+| TimelockController | `0x1E0fADee5540a77012f1944fcce58677fC087f6e` |
+| ECFPRegistry | `0xcB532fe70299D53Cc81B5F6365f56A108784d05d` |
+| SanctionsOracle | `0xEeeb33c8b7C936bD8e72A859a3e1F9cc8A26f3B4` |
+| OlympiaMemberNFT | `0x720676EBfe45DECfC43c8E9870C64413a2480EE0` |
+| OlympiaTreasury | `0xd6165F3aF4281037bce810621F62B43077Fb0e37` |
+
+Addresses defined in `src/lib/contracts/addresses.ts`. ABIs in `src/lib/contracts/abis/`.
 
 ## Related ECIPs
 
