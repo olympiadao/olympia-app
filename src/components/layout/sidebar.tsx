@@ -9,6 +9,7 @@ import {
   Landmark,
   Shield,
   Settings2,
+  ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -72,6 +73,26 @@ export function Sidebar() {
         <p className="mt-1 px-3 text-xs text-text-subtle">
           Demo v0.1 · Mordor Testnet
         </p>
+        <div className="mt-2 flex items-center gap-3 px-3">
+          <a
+            href="https://olympiadao.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs text-text-subtle transition-colors hover:text-brand-green"
+          >
+            DAO
+            <ExternalLink className="h-3 w-3" />
+          </a>
+          <a
+            href="https://olympiatreasury.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs text-text-subtle transition-colors hover:text-brand-green"
+          >
+            Treasury
+            <ExternalLink className="h-3 w-3" />
+          </a>
+        </div>
       </div>
     </aside>
   );
