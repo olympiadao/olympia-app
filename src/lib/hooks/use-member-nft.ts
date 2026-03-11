@@ -30,6 +30,7 @@ export function useTotalMembers() {
     address: contracts[63].memberNFT,
     abi: abis.memberNFT,
     functionName: "totalSupply",
+    query: { refetchInterval: 60_000 },
   });
 }
 
@@ -98,6 +99,8 @@ export function useMembers() {
     }
 
     fetchMembers();
+    const interval = setInterval(fetchMembers, 60_000);
+    return () => clearInterval(interval);
   }, [client]);
 
   return { members, isLoading };

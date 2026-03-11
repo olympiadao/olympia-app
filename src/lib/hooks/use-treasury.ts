@@ -8,5 +8,6 @@ export function useTreasuryBalance() {
   return useBalance({
     address: contracts[63].treasury,
     chainId: mordor.id,
+    query: { refetchInterval: 60_000 },
   });
 }

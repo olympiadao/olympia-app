@@ -61,6 +61,8 @@ export function useProposals() {
     }
 
     fetchProposals();
+    const interval = setInterval(fetchProposals, 60_000);
+    return () => clearInterval(interval);
   }, [client]);
 
   return { proposals, isLoading, error };

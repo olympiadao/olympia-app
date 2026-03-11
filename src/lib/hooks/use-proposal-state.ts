@@ -5,12 +5,16 @@ import { abis } from "@/lib/contracts/config";
 import { contracts } from "@/lib/contracts/addresses";
 import type { ProposalStateValue } from "@/lib/utils/proposal-states";
 
+/** Poll every 60s — catches state transitions within ~4 Mordor blocks */
+const POLL_INTERVAL = 60_000;
+
 export function useProposalState(proposalId: bigint) {
   const { data, isLoading, error } = useReadContract({
     address: contracts[63].governor,
     abi: abis.governor,
     functionName: "state",
     args: [proposalId],
+    query: { refetchInterval: POLL_INTERVAL },
   });
 
   return {
@@ -26,6 +30,7 @@ export function useProposalEta(proposalId: bigint) {
     abi: abis.governor,
     functionName: "proposalEta",
     args: [proposalId],
+    query: { refetchInterval: POLL_INTERVAL },
   });
 
   return {
@@ -41,6 +46,7 @@ export function useProposalVotes(proposalId: bigint) {
     abi: abis.governor,
     functionName: "proposalVotes",
     args: [proposalId],
+    query: { refetchInterval: POLL_INTERVAL },
   });
 
   const [againstVotes, forVotes, abstainVotes] = (data as

@@ -17,7 +17,9 @@ import {
   useExecuteProposal,
 } from "@/lib/hooks/use-proposal-actions";
 import { useTotalMembers } from "@/lib/hooks/use-member-nft";
-import { truncateAddress, explorerUrl } from "@/lib/utils/format";
+import { truncateAddress, formatEtc, explorerUrl } from "@/lib/utils/format";
+import { decodeProposalActions } from "@/lib/utils/decode-actions";
+import { useProposalTxHashes } from "@/lib/hooks/use-proposal-events";
 import { ProposalState } from "@/lib/utils/proposal-states";
 import {
   parseProposalDescription,
@@ -29,7 +31,7 @@ import {
   estimateTimeMs,
   formatCountdown,
 } from "@/lib/utils/block-time";
-import { Info, Clock, Play } from "lucide-react";
+import { Info, Clock, Play, ExternalLink } from "lucide-react";
 import Markdown from "react-markdown";
 
 export default function ProposalDetailPage({
@@ -47,6 +49,7 @@ export default function ProposalDetailPage({
   const { data: totalSupply } = useTotalMembers();
 
   const { data: blockStats } = useBlockStats();
+  const txHashes = useProposalTxHashes(proposalId);
 
   const {
     queue,
@@ -151,37 +154,21 @@ export default function ProposalDetailPage({
           </Card>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Treasury Action</CardTitle>
-          </CardHeader>
-          <div className="space-y-2">
-            {proposal.targets.map((target, i) => (
-              <div
-                key={i}
-                className="rounded-lg border border-border-subtle bg-bg-elevated p-3"
-              >
-                <p className="text-xs text-text-muted">Target #{i + 1}</p>
-                <p className="font-mono text-sm">
-                  <a
-                    href={explorerUrl("address", target)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-brand-green hover:underline"
-                  >
-                    {target}
-                  </a>
-                </p>
-                {proposal.values[i] !== undefined &&
-                  proposal.values[i] > 0n && (
-                    <p className="mt-1 text-xs text-text-muted">
-                      Value: {proposal.values[i]!.toString()} wei
-                    </p>
-                  )}
-              </div>
-            ))}
-          </div>
-        </Card>
+        <ProposalActions
+          targets={proposal.targets}
+          values={proposal.values}
+          calldatas={proposal.calldatas}
+        />
+
+        <GovernancePipeline
+          state={state}
+          proposer={proposal.proposer}
+          blockNumber={proposal.blockNumber}
+          forVotes={forVotes}
+          againstVotes={againstVotes}
+          abstainVotes={abstainVotes}
+          txHashes={txHashes}
+        />
       </div>
 
       {/* Sidebar */}
@@ -384,4 +371,221 @@ function formatCountdownText(
   if (blocks === 0) return null;
   const ms = estimateTimeMs(blocks, stats.avgBlockTimeMs);
   return { time: formatCountdown(ms), blocks };
+}
+
+function ProposalActions({
+  targets,
+  values,
+  calldatas,
+}: {
+  targets: readonly `0x${string}`[];
+  values: readonly bigint[];
+  calldatas: readonly `0x${string}`[];
+}) {
+  const actions = decodeProposalActions(targets, values, calldatas);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>On-Chain Actions</CardTitle>
+      </CardHeader>
+      <div className="space-y-3">
+        {actions.map((action, i) => (
+          <div
+            key={i}
+            className="overflow-hidden rounded-lg border border-border-subtle"
+          >
+            <div className="flex items-center justify-between bg-bg-elevated px-3 py-2">
+              <span className="text-xs font-medium text-text-primary">
+                Action #{i + 1}
+              </span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                  action.type === "Treasury Withdrawal"
+                    ? "bg-brand-amber-subtle text-brand-amber"
+                    : action.type === "Signaling"
+                      ? "bg-brand-green-subtle text-brand-green"
+                      : "bg-bg-elevated text-text-muted"
+                }`}
+              >
+                {action.type}
+              </span>
+            </div>
+            <table className="w-full text-sm">
+              <tbody>
+                <ActionRow label="Target">
+                  <span className="text-text-muted">{action.targetLabel}</span>
+                  <span className="mx-1.5 text-text-subtle">·</span>
+                  <a
+                    href={explorerUrl("address", action.target)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-mono text-brand-green hover:underline"
+                  >
+                    {truncateAddress(action.target)}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                </ActionRow>
+                {action.recipient && (
+                  <ActionRow label="Recipient">
+                    <a
+                      href={explorerUrl("address", action.recipient)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 font-mono text-brand-green hover:underline"
+                    >
+                      {truncateAddress(action.recipient)}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </ActionRow>
+                )}
+                {action.amount !== undefined && (
+                  <ActionRow label="Amount">
+                    <span className="font-semibold text-brand-amber">
+                      {formatEtc(action.amount)} METC
+                    </span>
+                  </ActionRow>
+                )}
+              </tbody>
+            </table>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function ActionRow({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <tr className="border-t border-border-subtle">
+      <td className="w-24 px-3 py-2 text-xs text-text-muted">{label}</td>
+      <td className="px-3 py-2 text-xs">{children}</td>
+    </tr>
+  );
+}
+
+function GovernancePipeline({
+  state,
+  proposer,
+  blockNumber,
+  forVotes,
+  againstVotes,
+  abstainVotes,
+  txHashes,
+}: {
+  state: number | undefined;
+  proposer: string;
+  blockNumber: bigint;
+  forVotes: bigint;
+  againstVotes: bigint;
+  abstainVotes: bigint;
+  txHashes: {
+    createTxHash?: `0x${string}`;
+    queueTxHash?: `0x${string}`;
+    executeTxHash?: `0x${string}`;
+  };
+}) {
+  const totalVotes = forVotes + againstVotes + abstainVotes;
+
+  const steps = [
+    {
+      label: "Proposed",
+      detail: `by ${truncateAddress(proposer)} at block #${blockNumber.toString()}`,
+      txHash: txHashes.createTxHash,
+      reached: state !== undefined,
+    },
+    {
+      label: "Voted",
+      detail:
+        totalVotes > 0n
+          ? `${forVotes.toString()} for · ${againstVotes.toString()} against · ${abstainVotes.toString()} abstain`
+          : "No votes yet",
+      reached:
+        state !== undefined &&
+        state !== ProposalState.Pending,
+    },
+    {
+      label: "Queued",
+      detail: txHashes.queueTxHash
+        ? "Entered timelock"
+        : state === ProposalState.Succeeded
+          ? "Ready to queue"
+          : "Pending",
+      txHash: txHashes.queueTxHash,
+      reached:
+        state === ProposalState.Queued ||
+        state === ProposalState.Executed,
+    },
+    {
+      label: "Executed",
+      detail: txHashes.executeTxHash
+        ? "Treasury action completed"
+        : "Pending",
+      txHash: txHashes.executeTxHash,
+      reached: state === ProposalState.Executed,
+    },
+  ];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Governance Pipeline</CardTitle>
+      </CardHeader>
+      <div className="space-y-0">
+        {steps.map((step, i) => (
+          <div key={step.label} className="flex gap-3">
+            {/* Timeline connector */}
+            <div className="flex flex-col items-center">
+              <div
+                className={`h-3 w-3 shrink-0 rounded-full border-2 ${
+                  step.reached
+                    ? "border-brand-green bg-brand-green"
+                    : "border-border-default bg-bg-elevated"
+                }`}
+              />
+              {i < steps.length - 1 && (
+                <div
+                  className={`w-0.5 grow ${
+                    steps[i + 1]?.reached
+                      ? "bg-brand-green"
+                      : "bg-border-default"
+                  }`}
+                />
+              )}
+            </div>
+            {/* Content */}
+            <div className="pb-4">
+              <div className="flex items-center gap-2">
+                <span
+                  className={`text-sm font-medium ${
+                    step.reached ? "text-text-primary" : "text-text-subtle"
+                  }`}
+                >
+                  {step.label}
+                </span>
+                {step.txHash && (
+                  <a
+                    href={explorerUrl("tx", step.txHash)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 font-mono text-xs text-brand-green hover:underline"
+                  >
+                    {step.txHash.slice(0, 10)}…{step.txHash.slice(-4)}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </div>
+              <p className="text-xs text-text-muted">{step.detail}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
 }
