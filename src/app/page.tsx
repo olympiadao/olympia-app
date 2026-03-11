@@ -8,7 +8,7 @@ import { formatEtc } from "@/lib/utils/format";
 import { ProposalStatus } from "@/components/proposals/proposal-status";
 import { useProposalState } from "@/lib/hooks/use-proposal-state";
 import Link from "next/link";
-import { ScrollText, Landmark, Users } from "lucide-react";
+import { ScrollText, Landmark, Users, Info } from "lucide-react";
 
 export default function Dashboard() {
   const { proposals, isLoading: proposalsLoading } = useProposals();
@@ -45,6 +45,52 @@ export default function Dashboard() {
           }
         />
       </div>
+
+      {/* How Governance Works */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-4 w-4 text-semantic-info" />
+            How Governance Works
+          </CardTitle>
+        </CardHeader>
+        <div className="space-y-2 text-sm text-text-secondary">
+          <p>
+            <strong className="text-text-primary">1.</strong> Members hold{" "}
+            <Link href="/members" className="text-brand-green hover:underline">
+              soulbound NFTs
+            </Link>{" "}
+            — one NFT equals one vote
+          </p>
+          <p>
+            <strong className="text-text-primary">2.</strong> Any member can{" "}
+            <Link
+              href="/proposals/new"
+              className="text-brand-green hover:underline"
+            >
+              create a proposal
+            </Link>{" "}
+            (treasury withdrawal or signaling)
+          </p>
+          <p>
+            <strong className="text-text-primary">3.</strong> Members vote
+            during the voting period (100 blocks, ~22 min on Mordor)
+          </p>
+          <p>
+            <strong className="text-text-primary">4.</strong> Passed proposals
+            are queued in a{" "}
+            <Link href="/treasury" className="text-brand-green hover:underline">
+              timelock
+            </Link>{" "}
+            (1 hour on Mordor)
+          </p>
+          <p>
+            <strong className="text-text-primary">5.</strong> After the
+            timelock, proposals are executed via the Executor with a final
+            sanctions check
+          </p>
+        </div>
+      </Card>
 
       <div>
         <CardHeader>

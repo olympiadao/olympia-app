@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTreasuryBalance } from "@/lib/hooks/use-treasury";
 import { formatEtc, explorerUrl } from "@/lib/utils/format";
 import { contracts } from "@/lib/contracts/addresses";
-import { Landmark, ExternalLink } from "lucide-react";
+import { Landmark, ExternalLink, Info } from "lucide-react";
 
 export default function TreasuryPage() {
   const { data: balance, isLoading } = useTreasuryBalance();
@@ -57,11 +57,39 @@ export default function TreasuryPage() {
           <CardTitle>Execution Path</CardTitle>
         </CardHeader>
         <div className="space-y-2 text-sm text-text-secondary">
-          <p>1. Proposal passes governance vote</p>
-          <p>2. Proposal is queued in TimelockController (24h delay)</p>
+          <p>1. Proposal passes governance vote (100 blocks, ~22 min)</p>
+          <p>2. Proposal is queued in TimelockController (1 hour on Mordor)</p>
           <p>3. After timelock, proposal is executed</p>
           <p>4. OlympiaExecutor checks sanctions (Layer 3)</p>
           <p>5. Treasury releases funds to recipient</p>
+        </div>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-4 w-4 text-semantic-info" />
+            How Treasury Withdrawals Work
+          </CardTitle>
+        </CardHeader>
+        <div className="space-y-3 text-sm text-text-secondary">
+          <p>
+            Only the <strong className="text-text-primary">OlympiaExecutor</strong> can
+            withdraw from the treasury. Direct transfers to the treasury
+            contract are accepted but cannot be withdrawn except through
+            governance.
+          </p>
+          <p>
+            The Executor is called by the TimelockController after a proposal
+            passes the full governance pipeline (propose → vote → queue →
+            execute).
+          </p>
+          <p>
+            <strong className="text-text-primary">Layer 3 sanctions check:</strong> The
+            Executor verifies the recipient is not on the sanctions list before
+            releasing funds. If the recipient is sanctioned, the withdrawal
+            reverts and funds remain safe in the treasury.
+          </p>
         </div>
       </Card>
     </div>

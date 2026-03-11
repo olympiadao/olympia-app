@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { abis } from "@/lib/contracts/config";
 import { contracts } from "@/lib/contracts/addresses";
+import { Info } from "lucide-react";
 
 export default function NewProposalPage() {
   const [title, setTitle] = useState("");
@@ -84,6 +85,29 @@ export default function NewProposalPage() {
           Create a governance proposal for the Olympia CoreDAO
         </p>
       </div>
+
+      <Card>
+        <div className="flex items-start gap-2">
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-semantic-info" />
+          <div className="space-y-2 text-xs text-text-muted">
+            <p>
+              Proposals require a title and optional description. To request
+              treasury funds, fill in the Treasury Action section with a
+              recipient address and ETC amount.
+            </p>
+            <p>
+              Your proposal will enter a <strong>1-block voting delay</strong>,
+              then a <strong>100-block voting period</strong> (~22 minutes on
+              Mordor). It needs 10% quorum to pass.
+            </p>
+            <p>
+              <strong>Signaling proposals</strong> (no treasury action) are also
+              supported — they record community sentiment on-chain without
+              moving funds.
+            </p>
+          </div>
+        </div>
+      </Card>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Card>
@@ -172,6 +196,13 @@ export default function NewProposalPage() {
             </div>
           </div>
         </Card>
+
+        {targetAddress && (
+          <p className="text-xs text-text-subtle">
+            The Executor contract checks the recipient against the sanctions
+            oracle before releasing funds (Layer 3 defense).
+          </p>
+        )}
 
         <Button
           type="submit"

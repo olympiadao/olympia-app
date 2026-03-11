@@ -7,6 +7,8 @@ import {
   ScrollText,
   Users,
   Landmark,
+  Shield,
+  Settings2,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
@@ -15,6 +17,7 @@ const navItems = [
   { href: "/proposals", label: "Proposals", icon: ScrollText },
   { href: "/members", label: "Members", icon: Users },
   { href: "/treasury", label: "Treasury", icon: Landmark },
+  { href: "/admin", label: "Admin", icon: Shield },
 ];
 
 export function Sidebar() {
@@ -53,8 +56,20 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-border-default px-4 py-4">
-        <p className="text-xs text-text-subtle">
+      <div className="border-t border-border-default px-3 py-3">
+        <Link
+          href="/config"
+          className={cn(
+            "flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-colors",
+            pathname === "/config"
+              ? "text-brand-green"
+              : "text-text-subtle hover:text-text-muted"
+          )}
+        >
+          <Settings2 className="h-3.5 w-3.5" />
+          Demo Config
+        </Link>
+        <p className="mt-1 px-3 text-xs text-text-subtle">
           Demo v0.1 · Mordor Testnet
         </p>
       </div>

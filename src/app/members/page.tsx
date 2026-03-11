@@ -2,16 +2,21 @@
 
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useTotalMembers, useIsMember } from "@/lib/hooks/use-member-nft";
+import {
+  useTotalMembers,
+  useIsMember,
+  useMembers,
+} from "@/lib/hooks/use-member-nft";
 import { useAccount } from "wagmi";
 import { contracts } from "@/lib/contracts/addresses";
 import { explorerUrl, truncateAddress } from "@/lib/utils/format";
-import { Users, Shield, ExternalLink } from "lucide-react";
+import { Users, Shield, ExternalLink, Info } from "lucide-react";
 
 export default function MembersPage() {
   const { data: totalMembers } = useTotalMembers();
   const { address } = useAccount();
   const { isMember, isLoading } = useIsMember();
+  const { members, isLoading: membersLoading } = useMembers();
 
   return (
     <div className="space-y-6">
@@ -66,6 +71,87 @@ export default function MembersPage() {
         </Card>
       </div>
 
+      {/* Member List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Member Registry</CardTitle>
+        </CardHeader>
+        {membersLoading ? (
+          <p className="text-sm text-text-muted">Loading members…</p>
+        ) : members.length === 0 ? (
+          <p className="text-sm text-text-muted">No members found</p>
+        ) : (
+          <div className="space-y-2">
+            <div className="grid grid-cols-[1fr_80px_100px] gap-2 border-b border-border-subtle pb-2 text-xs font-medium text-text-muted">
+              <span>Address</span>
+              <span>Token ID</span>
+              <span>Mint Block</span>
+            </div>
+            {members.map((member) => {
+              const isYou =
+                address?.toLowerCase() === member.address.toLowerCase();
+              return (
+                <div
+                  key={member.tokenId.toString()}
+                  className={`grid grid-cols-[1fr_80px_100px] items-center gap-2 rounded-lg px-2 py-1.5 ${
+                    isYou
+                      ? "border border-brand-green/20 bg-brand-green/5"
+                      : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={explorerUrl("address", member.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 font-mono text-sm text-brand-green hover:underline"
+                    >
+                      {truncateAddress(member.address, 6)}
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                    {isYou && (
+                      <Badge className="bg-brand-green-subtle text-brand-green text-xs">
+                        You
+                      </Badge>
+                    )}
+                  </div>
+                  <span className="font-mono text-sm text-text-secondary">
+                    #{member.tokenId.toString()}
+                  </span>
+                  <span className="font-mono text-sm text-text-subtle">
+                    {member.blockNumber.toString()}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </Card>
+
+      {/* Voting Power Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-4 w-4 text-semantic-info" />
+            Voting Power
+          </CardTitle>
+        </CardHeader>
+        <div className="space-y-3 text-sm text-text-secondary">
+          <p>
+            Voting power is{" "}
+            <strong className="text-text-primary">
+              locked at proposal creation time
+            </strong>
+            . New members minted after a proposal is created cannot vote on that
+            proposal.
+          </p>
+          <p>
+            This snapshot mechanism prevents flash-minting attacks — an
+            adversary cannot mint NFTs right before a vote to swing the outcome.
+          </p>
+        </div>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>About Membership</CardTitle>
@@ -76,13 +162,13 @@ export default function MembersPage() {
             governance voting. Each NFT represents exactly one vote.
           </p>
           <p>
-            NFTs are minted by the DAO admin and automatically delegate
-            voting power to the holder. No manual delegation is needed.
+            NFTs are minted by the DAO admin and automatically delegate voting
+            power to the holder. No manual delegation is needed.
           </p>
           <p>
-            Voting power snapshots are taken at proposal creation time,
-            preventing flash-loan or last-minute transfers from affecting
-            votes.
+            Identity verification happens at the application layer (e.g.,
+            BrightID, Gitcoin Passport). The MINTER_ROLE holder is responsible
+            for KYC before minting.
           </p>
         </div>
       </Card>

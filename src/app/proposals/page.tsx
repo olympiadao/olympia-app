@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProposalStatus } from "@/components/proposals/proposal-status";
 import { useProposals } from "@/lib/hooks/use-proposals";
 import { useProposalState } from "@/lib/hooks/use-proposal-state";
@@ -28,6 +28,58 @@ export default function ProposalsPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Proposal Lifecycle Guide */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Info className="h-4 w-4 text-semantic-info" />
+            Proposal Lifecycle
+          </CardTitle>
+        </CardHeader>
+        <div className="grid gap-2 text-xs sm:grid-cols-2">
+          <LifecycleStep
+            state="Pending"
+            color="text-text-muted"
+            desc="Waiting for voting delay (1 block)"
+          />
+          <LifecycleStep
+            state="Active"
+            color="text-semantic-info"
+            desc="Voting open. Cast For/Against/Abstain. Needs 10% quorum."
+          />
+          <LifecycleStep
+            state="Succeeded"
+            color="text-brand-green"
+            desc="Passed. Ready to queue in the timelock."
+          />
+          <LifecycleStep
+            state="Queued"
+            color="text-brand-amber"
+            desc="In timelock (1 hour). Safety period before execution."
+          />
+          <LifecycleStep
+            state="Executed"
+            color="text-brand-green"
+            desc="Treasury action completed successfully."
+          />
+          <LifecycleStep
+            state="Defeated"
+            color="text-semantic-error"
+            desc="Did not reach quorum or majority."
+          />
+          <LifecycleStep
+            state="Canceled"
+            color="text-semantic-error"
+            desc="Canceled (e.g., sanctioned recipient detected)."
+          />
+          <LifecycleStep
+            state="Expired"
+            color="text-text-subtle"
+            desc="Succeeded but not queued in time."
+          />
+        </div>
+      </Card>
 
       {isLoading ? (
         <p className="text-sm text-text-muted">Loading proposals…</p>
@@ -101,5 +153,22 @@ function ProposalCard({
         </div>
       </Card>
     </Link>
+  );
+}
+
+function LifecycleStep({
+  state,
+  color,
+  desc,
+}: {
+  state: string;
+  color: string;
+  desc: string;
+}) {
+  return (
+    <div className="rounded-lg border border-border-subtle bg-bg-elevated px-3 py-2">
+      <span className={`font-medium ${color}`}>{state}</span>
+      <span className="ml-1 text-text-subtle">— {desc}</span>
+    </div>
   );
 }
