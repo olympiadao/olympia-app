@@ -22,6 +22,12 @@ import {
   parseProposalDescription,
   proposalCategoryColors,
 } from "@/lib/utils/proposal-categories";
+import { useBlockStats } from "@/lib/hooks/use-block-stats";
+import {
+  blocksRemaining,
+  estimateTimeMs,
+  formatCountdown,
+} from "@/lib/utils/block-time";
 import { Info, Clock, Play } from "lucide-react";
 import Markdown from "react-markdown";
 
@@ -37,6 +43,8 @@ export default function ProposalDetailPage({
   const { forVotes, againstVotes, abstainVotes } =
     useProposalVotes(proposalId);
   const { data: totalSupply } = useTotalMembers();
+
+  const { data: blockStats } = useBlockStats();
 
   const {
     queue,
@@ -126,6 +134,7 @@ export default function ProposalDetailPage({
         <StateGuidance
           state={state}
           voteEnd={proposal.voteEnd}
+          blockStats={blockStats}
         />
 
         {body && (
@@ -273,11 +282,17 @@ export default function ProposalDetailPage({
 function StateGuidance({
   state,
   voteEnd,
+  blockStats,
 }: {
   state: number | undefined;
   voteEnd: bigint;
+  blockStats: { currentBlock: number; avgBlockTimeMs: number } | undefined;
 }) {
   if (state === undefined) return null;
+
+  const countdown = blockStats
+    ? formatCountdownText(voteEnd, blockStats)
+    : null;
 
   const messages: Record<number, { text: string; color: string }> = {
     [ProposalState.Pending]: {
@@ -285,11 +300,13 @@ function StateGuidance({
       color: "text-text-muted",
     },
     [ProposalState.Active]: {
-      text: `Voting is open until block #${voteEnd.toString()}. This proposal needs 10% quorum (For votes as percentage of total NFT supply) to pass.`,
+      text: countdown
+        ? `Voting closes in ~${countdown.time} (~${countdown.blocks} blocks remaining). 10% quorum required.`
+        : `Voting is open until block #${voteEnd.toString()}. 10% quorum required.`,
       color: "text-semantic-info",
     },
     [ProposalState.Succeeded]: {
-      text: "This proposal passed! It needs to be queued in the timelock before it can be executed. Use the Queue button in the sidebar.",
+      text: "This proposal passed! Queue it in the timelock to begin the waiting period before execution.",
       color: "text-brand-green",
     },
     [ProposalState.Queued]: {
@@ -321,8 +338,26 @@ function StateGuidance({
     <Card>
       <div className="flex items-start gap-2">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-semantic-info" />
-        <p className={`text-xs ${msg.color}`}>{msg.text}</p>
+        <div>
+          <p className={`text-xs ${msg.color}`}>{msg.text}</p>
+          {blockStats && state === ProposalState.Active && (
+            <p className="mt-1 font-mono text-xs text-text-subtle">
+              Block #{blockStats.currentBlock.toLocaleString()} / #
+              {voteEnd.toString()}
+            </p>
+          )}
+        </div>
       </div>
     </Card>
   );
+}
+
+function formatCountdownText(
+  voteEnd: bigint,
+  stats: { currentBlock: number; avgBlockTimeMs: number }
+) {
+  const blocks = blocksRemaining(voteEnd, stats.currentBlock);
+  if (blocks === 0) return null;
+  const ms = estimateTimeMs(blocks, stats.avgBlockTimeMs);
+  return { time: formatCountdown(ms), blocks };
 }

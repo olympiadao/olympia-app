@@ -7,6 +7,13 @@ import { useTotalMembers } from "@/lib/hooks/use-member-nft";
 import { formatEtc } from "@/lib/utils/format";
 import { ProposalStatus } from "@/components/proposals/proposal-status";
 import { useProposalState } from "@/lib/hooks/use-proposal-state";
+import { useBlockStats } from "@/lib/hooks/use-block-stats";
+import { ProposalState } from "@/lib/utils/proposal-states";
+import {
+  blocksRemaining,
+  estimateTimeMs,
+  formatCountdown,
+} from "@/lib/utils/block-time";
 import Link from "next/link";
 import { ScrollText, Landmark, Users, Info } from "lucide-react";
 import {
@@ -18,6 +25,7 @@ export default function Dashboard() {
   const { proposals, isLoading: proposalsLoading } = useProposals();
   const { data: balance } = useTreasuryBalance();
   const { data: totalMembers } = useTotalMembers();
+  const { data: blockStats } = useBlockStats();
 
   return (
     <div className="space-y-8">
@@ -122,6 +130,8 @@ export default function Dashboard() {
                 key={p.proposalId.toString()}
                 proposalId={p.proposalId}
                 description={p.description}
+                voteEnd={p.voteEnd}
+                blockStats={blockStats}
               />
             ))}
           </div>
@@ -156,12 +166,25 @@ function StatCard({
 function ProposalRow({
   proposalId,
   description,
+  voteEnd,
+  blockStats,
 }: {
   proposalId: bigint;
   description: string;
+  voteEnd: bigint;
+  blockStats: { currentBlock: number; avgBlockTimeMs: number } | undefined;
 }) {
   const { state } = useProposalState(proposalId);
   const parsed = parseProposalDescription(description);
+
+  let countdown: string | null = null;
+  if (state === ProposalState.Active && blockStats) {
+    const blocks = blocksRemaining(voteEnd, blockStats.currentBlock);
+    if (blocks > 0) {
+      const ms = estimateTimeMs(blocks, blockStats.avgBlockTimeMs);
+      countdown = formatCountdown(ms);
+    }
+  }
 
   return (
     <Link href={`/proposals/${proposalId.toString()}`}>
@@ -176,6 +199,11 @@ function ProposalRow({
               </span>
             )}
             <p className="truncate text-sm font-medium">{parsed.title}</p>
+            {countdown && (
+              <span className="shrink-0 text-xs text-brand-green">
+                ~{countdown} left
+              </span>
+            )}
           </div>
           <p className="mt-0.5 font-mono text-xs text-text-subtle">
             #{proposalId.toString().slice(0, 8)}…
