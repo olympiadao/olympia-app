@@ -16,7 +16,10 @@ import {
   useQueueProposal,
   useExecuteProposal,
 } from "@/lib/hooks/use-proposal-actions";
-import { useTotalMembers } from "@/lib/hooks/use-member-nft";
+import { useTotalMembers, useMembers } from "@/lib/hooks/use-member-nft";
+import { useVoteCastEvents } from "@/lib/hooks/use-vote-events";
+import type { VoteCastEvent } from "@/lib/hooks/use-vote-events";
+import type { Member } from "@/lib/hooks/use-member-nft";
 import { truncateAddress, formatEtc, explorerUrl } from "@/lib/utils/format";
 import { decodeProposalActions } from "@/lib/utils/decode-actions";
 import { useProposalTxHashes } from "@/lib/hooks/use-proposal-events";
@@ -31,7 +34,7 @@ import {
   estimateTimeMs,
   formatCountdown,
 } from "@/lib/utils/block-time";
-import { Info, Clock, Play, ExternalLink } from "lucide-react";
+import { Info, Clock, Play, ExternalLink, ChevronDown } from "lucide-react";
 import Markdown from "react-markdown";
 
 export default function ProposalDetailPage({
@@ -50,6 +53,8 @@ export default function ProposalDetailPage({
 
   const { data: blockStats } = useBlockStats();
   const txHashes = useProposalTxHashes(proposalId);
+  const { votes } = useVoteCastEvents(proposalId);
+  const { members } = useMembers();
 
   const {
     queue,
@@ -168,6 +173,8 @@ export default function ProposalDetailPage({
           againstVotes={againstVotes}
           abstainVotes={abstainVotes}
           txHashes={txHashes}
+          votes={votes}
+          members={members}
         />
       </div>
 
@@ -470,6 +477,12 @@ function ActionRow({
   );
 }
 
+const VOTE_LABELS: Record<number, { label: string; color: string }> = {
+  1: { label: "For", color: "text-brand-green" },
+  0: { label: "Against", color: "text-semantic-error" },
+  2: { label: "Abstain", color: "text-text-subtle" },
+};
+
 function GovernancePipeline({
   state,
   proposer,
@@ -478,6 +491,8 @@ function GovernancePipeline({
   againstVotes,
   abstainVotes,
   txHashes,
+  votes,
+  members,
 }: {
   state: number | undefined;
   proposer: string;
@@ -490,8 +505,17 @@ function GovernancePipeline({
     queueTxHash?: `0x${string}`;
     executeTxHash?: `0x${string}`;
   };
+  votes: VoteCastEvent[];
+  members: Member[];
 }) {
   const totalVotes = forVotes + againstVotes + abstainVotes;
+
+  const votedAddresses = new Set(
+    votes.map((v) => v.voter.toLowerCase())
+  );
+  const nonVoters = members.filter(
+    (m) => !votedAddresses.has(m.address.toLowerCase())
+  );
 
   const steps = [
     {
@@ -560,7 +584,7 @@ function GovernancePipeline({
               )}
             </div>
             {/* Content */}
-            <div className="pb-4">
+            <div className="min-w-0 flex-1 pb-4">
               <div className="flex items-center gap-2">
                 <span
                   className={`text-sm font-medium ${
@@ -582,6 +606,120 @@ function GovernancePipeline({
                 )}
               </div>
               <p className="text-xs text-text-muted">{step.detail}</p>
+
+              {/* Collapsible vote ledger under the Voted step */}
+              {step.label === "Voted" && step.reached && votes.length > 0 && (
+                <details className="group mt-2">
+                  <summary className="flex cursor-pointer list-none items-center gap-1 text-xs font-medium text-text-muted hover:text-text-secondary">
+                    <ChevronDown className="h-3 w-3 transition-transform group-open:rotate-180" />
+                    View {votes.length} vote{votes.length !== 1 ? "s" : ""}
+                    {nonVoters.length > 0 &&
+                      ` · ${nonVoters.length} did not vote`}
+                  </summary>
+                  <div className="mt-2 overflow-x-auto rounded-lg border border-border-subtle">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="border-b border-border-subtle bg-bg-elevated">
+                          <th className="px-3 py-1.5 text-left font-medium text-text-muted">
+                            Voter
+                          </th>
+                          <th className="px-3 py-1.5 text-left font-medium text-text-muted">
+                            Vote
+                          </th>
+                          <th className="px-3 py-1.5 text-left font-medium text-text-muted">
+                            Tx
+                          </th>
+                          <th className="px-3 py-1.5 text-right font-medium text-text-muted">
+                            Block
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {votes.map((vote) => {
+                          const voteInfo = VOTE_LABELS[vote.support] ?? {
+                            label: `Unknown (${vote.support})`,
+                            color: "text-text-muted",
+                          };
+                          return (
+                            <tr
+                              key={vote.txHash}
+                              className="border-b border-border-subtle last:border-b-0"
+                            >
+                              <td className="px-3 py-1.5">
+                                <a
+                                  href={explorerUrl("address", vote.voter)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 font-mono text-brand-green hover:underline"
+                                >
+                                  {truncateAddress(vote.voter)}
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              </td>
+                              <td className="px-3 py-1.5">
+                                <span className={`font-medium ${voteInfo.color}`}>
+                                  {voteInfo.label}
+                                </span>
+                                {vote.reason && (
+                                  <span
+                                    className="ml-1.5 text-text-subtle"
+                                    title={vote.reason}
+                                  >
+                                    &ldquo;
+                                    {vote.reason.length > 30
+                                      ? `${vote.reason.slice(0, 30)}…`
+                                      : vote.reason}
+                                    &rdquo;
+                                  </span>
+                                )}
+                              </td>
+                              <td className="px-3 py-1.5">
+                                <a
+                                  href={explorerUrl("tx", vote.txHash)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 font-mono text-brand-green hover:underline"
+                                >
+                                  {vote.txHash.slice(0, 10)}…
+                                  {vote.txHash.slice(-4)}
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                </a>
+                              </td>
+                              <td className="px-3 py-1.5 text-right font-mono text-text-muted">
+                                #{vote.blockNumber.toString()}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                        {nonVoters.map((member) => (
+                          <tr
+                            key={member.address}
+                            className="border-b border-border-subtle last:border-b-0 opacity-50"
+                          >
+                            <td className="px-3 py-1.5">
+                              <a
+                                href={explorerUrl("address", member.address)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 font-mono text-brand-green hover:underline"
+                              >
+                                {truncateAddress(member.address)}
+                                <ExternalLink className="h-2.5 w-2.5" />
+                              </a>
+                            </td>
+                            <td
+                              className="px-3 py-1.5 text-text-subtle"
+                              colSpan={3}
+                            >
+                              Did not vote
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </details>
+              )}
             </div>
           </div>
         ))}
