@@ -1,0 +1,33 @@
+# Olympia Governance — CoreDAO for Ethereum Classic
+
+## About
+
+Olympia Governance is the CoreDAO governance application for Ethereum Classic (ETC). It provides a web interface for browsing proposals, submitting ECFPs (Ethereum Classic Funding Proposals), voting, managing treasury funds, and administering soulbound member NFTs.
+
+## Key Features
+
+- Proposal browsing and creation (ECIP-1113 OlympiaGovernor)
+- ECFP submission and tracking (ECIP-1114 ECFPRegistry)
+- On-chain voting with soulbound NFT membership
+- Treasury monitoring and withdrawal proposals (ECIP-1112)
+- Sanctions compliance checking (ECIP-1119 SanctionsOracle)
+- Timelock-controlled execution
+
+## Technology
+
+- Next.js 16 (App Router)
+- React 19, TypeScript 5
+- wagmi 2 + viem (Ethereum Classic interaction)
+- Tailwind CSS 4
+
+## Network
+
+- Mordor Testnet (Chain ID 63)
+- Demo v0.1
+
+## Links
+
+- DAO: https://olympiadao.org
+- Treasury: https://olympiatreasury.org
+- App: https://core.olympiadao.org
+- GitHub: https://github.com/olympiadao
