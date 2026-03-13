@@ -19,6 +19,27 @@ export const proposalCategoryColors: Record<ProposalCategory, string> = {
 };
 
 /**
+ * Strip markdown syntax from text for plain-text preview.
+ */
+export function stripMarkdown(text: string): string {
+  return text
+    .replace(/```[\s\S]*?```/g, "")          // fenced code blocks
+    .replace(/^#{1,6}\s+/gm, "")             // headings at line start
+    .replace(/\*\*([^*]+)\*\*/g, "$1")       // bold
+    .replace(/__([^_]+)__/g, "$1")           // bold alt
+    .replace(/\*([^*]+)\*/g, "$1")           // italic
+    .replace(/_([^_]+)_/g, "$1")             // italic alt
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // links
+    .replace(/^[-*+]\s+/gm, "")             // unordered list markers
+    .replace(/^\d+\.\s+/gm, "")             // ordered list markers
+    .replace(/^---+$/gm, "")                // horizontal rules
+    .replace(/`([^`]+)`/g, "$1")            // inline code
+    .replace(/\n+/g, " ")                   // all newlines → space
+    .replace(/\s{2,}/g, " ")               // collapse whitespace
+    .trim();
+}
+
+/**
  * Parse category and title from a proposal description.
  * Format: "[CATEGORY] Title text\nBody..."
  * Returns { category, title, body } or null category if no prefix found.
