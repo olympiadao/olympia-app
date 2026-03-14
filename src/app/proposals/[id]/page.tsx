@@ -16,7 +16,7 @@ import {
   useQueueProposal,
   useExecuteProposal,
 } from "@/lib/hooks/use-proposal-actions";
-import { useTotalMembers, useMembers } from "@/lib/hooks/use-member-nft";
+import { useMembers } from "@/lib/hooks/use-member-nft";
 import { useVoteCastEvents } from "@/lib/hooks/use-vote-events";
 import type { VoteCastEvent } from "@/lib/hooks/use-vote-events";
 import type { Member } from "@/lib/hooks/use-member-nft";
@@ -49,8 +49,6 @@ export default function ProposalDetailPage({
   const { forVotes, againstVotes, abstainVotes } =
     useProposalVotes(proposalId);
   const { eta: proposalEta } = useProposalEta(proposalId);
-  const { data: totalSupply } = useTotalMembers();
-
   const { data: blockStats } = useBlockStats();
   const txHashes = useProposalTxHashes(proposalId);
   const { votes } = useVoteCastEvents(proposalId);
@@ -169,6 +167,7 @@ export default function ProposalDetailPage({
           state={state}
           proposer={proposal.proposer}
           blockNumber={proposal.blockNumber}
+          voteStart={proposal.voteStart}
           forVotes={forVotes}
           againstVotes={againstVotes}
           abstainVotes={abstainVotes}
@@ -188,7 +187,7 @@ export default function ProposalDetailPage({
             forVotes={forVotes}
             againstVotes={againstVotes}
             abstainVotes={abstainVotes}
-            totalSupply={totalSupply as bigint | undefined}
+            eligibleMembers={proposal ? members.filter((m) => m.blockNumber <= proposal.voteStart).length : undefined}
           />
         </Card>
 
@@ -487,6 +486,7 @@ function GovernancePipeline({
   state,
   proposer,
   blockNumber,
+  voteStart,
   forVotes,
   againstVotes,
   abstainVotes,
@@ -497,6 +497,7 @@ function GovernancePipeline({
   state: number | undefined;
   proposer: string;
   blockNumber: bigint;
+  voteStart: bigint;
   forVotes: bigint;
   againstVotes: bigint;
   abstainVotes: bigint;
@@ -510,10 +511,14 @@ function GovernancePipeline({
 }) {
   const totalVotes = forVotes + againstVotes + abstainVotes;
 
+  // Only members minted at or before the snapshot block were eligible to vote
+  const eligibleMembers = members.filter(
+    (m) => m.blockNumber <= voteStart
+  );
   const votedAddresses = new Set(
     votes.map((v) => v.voter.toLowerCase())
   );
-  const nonVoters = members.filter(
+  const nonVoters = eligibleMembers.filter(
     (m) => !votedAddresses.has(m.address.toLowerCase())
   );
 

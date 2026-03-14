@@ -4,18 +4,18 @@ interface VoteStatisticsProps {
   forVotes: bigint;
   againstVotes: bigint;
   abstainVotes: bigint;
-  totalSupply?: bigint;
+  eligibleMembers?: number;
 }
 
 export function VoteStatistics({
   forVotes,
   againstVotes,
   abstainVotes,
-  totalSupply,
+  eligibleMembers,
 }: VoteStatisticsProps) {
   const totalVotes = forVotes + againstVotes + abstainVotes;
-  // Percentage of total NFT supply (for quorum context), fallback to votes cast
-  const base = totalSupply && totalSupply > 0n ? totalSupply : totalVotes;
+  // Percentage of eligible members at snapshot block, fallback to votes cast
+  const base = eligibleMembers && eligibleMembers > 0 ? BigInt(eligibleMembers) : totalVotes;
   const pct = (v: bigint) =>
     base > 0n ? Number((v * 1000n) / base) / 10 : 0;
 
@@ -46,9 +46,9 @@ export function VoteStatistics({
         <VoteLabel label="Abstain" count={abstainVotes} pct={abstainPct} className="text-text-subtle" />
       </div>
 
-      {totalSupply !== undefined && (
+      {eligibleMembers !== undefined && (
         <p className="text-xs text-text-subtle">
-          {totalVotes.toString()} of {totalSupply.toString()} members voted ({base > 0n ? Number((totalVotes * 1000n) / base) / 10 : 0}% turnout)
+          {totalVotes.toString()} of {eligibleMembers} eligible members voted ({base > 0n ? Number((totalVotes * 1000n) / base) / 10 : 0}% turnout)
         </p>
       )}
     </div>
