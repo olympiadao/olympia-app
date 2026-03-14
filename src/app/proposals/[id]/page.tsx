@@ -144,6 +144,8 @@ export default function ProposalDetailPage({
           voteEnd={proposal.voteEnd}
           blockStats={blockStats}
           proposalEta={proposalEta}
+          forVotes={forVotes}
+          againstVotes={againstVotes}
         />
 
         {body && (
@@ -280,11 +282,15 @@ function StateGuidance({
   voteEnd,
   blockStats,
   proposalEta,
+  forVotes,
+  againstVotes,
 }: {
   state: number | undefined;
   voteEnd: bigint;
   blockStats: { currentBlock: number; avgBlockTimeMs: number } | undefined;
   proposalEta: bigint | undefined;
+  forVotes: bigint;
+  againstVotes: bigint;
 }) {
   if (state === undefined) return null;
 
@@ -320,7 +326,17 @@ function StateGuidance({
       color: "text-brand-green",
     },
     [ProposalState.Defeated]: {
-      text: "This proposal was defeated. It did not reach the required quorum or did not receive a majority of 'For' votes.",
+      text: `This proposal was defeated. ${
+        forVotes !== undefined && againstVotes !== undefined
+          ? forVotes > againstVotes
+            ? `It received ${forVotes.toString()} For vote${forVotes !== 1n ? "s" : ""} but did not reach the 10% quorum threshold.`
+            : againstVotes > forVotes
+              ? `It was voted down ${againstVotes.toString()} Against to ${forVotes.toString()} For.`
+              : forVotes === 0n && againstVotes === 0n
+                ? "No votes were cast — quorum was not reached."
+                : `It tied ${forVotes.toString()}-${againstVotes.toString()} and did not achieve a majority.`
+          : "It did not reach the required quorum or did not receive a majority of 'For' votes."
+      }`,
       color: "text-semantic-error",
     },
     [ProposalState.Canceled]: {
@@ -522,6 +538,20 @@ function GovernancePipeline({
     (m) => !votedAddresses.has(m.address.toLowerCase())
   );
 
+  const isTerminal =
+    state === ProposalState.Defeated ||
+    state === ProposalState.Canceled ||
+    state === ProposalState.Expired;
+
+  const terminalLabel =
+    state === ProposalState.Defeated
+      ? "Proposal defeated"
+      : state === ProposalState.Canceled
+        ? "Proposal canceled"
+        : state === ProposalState.Expired
+          ? "Proposal expired"
+          : undefined;
+
   const steps = [
     {
       label: "Proposed",
@@ -543,21 +573,27 @@ function GovernancePipeline({
       label: "Queued",
       detail: txHashes.queueTxHash
         ? "Entered timelock"
-        : state === ProposalState.Succeeded
-          ? "Ready to queue"
-          : "Pending",
+        : isTerminal
+          ? terminalLabel!
+          : state === ProposalState.Succeeded
+            ? "Ready to queue"
+            : "Pending",
       txHash: txHashes.queueTxHash,
       reached:
         state === ProposalState.Queued ||
         state === ProposalState.Executed,
+      skipped: isTerminal,
     },
     {
       label: "Executed",
       detail: txHashes.executeTxHash
         ? "Treasury action completed"
-        : "Pending",
+        : isTerminal
+          ? terminalLabel!
+          : "Pending",
       txHash: txHashes.executeTxHash,
       reached: state === ProposalState.Executed,
+      skipped: isTerminal,
     },
   ];
 
@@ -575,7 +611,9 @@ function GovernancePipeline({
                 className={`h-3 w-3 shrink-0 rounded-full border-2 ${
                   step.reached
                     ? "border-brand-green bg-brand-green"
-                    : "border-border-default bg-bg-elevated"
+                    : step.skipped
+                      ? "border-semantic-error/40 bg-semantic-error/20"
+                      : "border-border-default bg-bg-elevated"
                 }`}
               />
               {i < steps.length - 1 && (
@@ -583,7 +621,9 @@ function GovernancePipeline({
                   className={`w-0.5 grow ${
                     steps[i + 1]?.reached
                       ? "bg-brand-green"
-                      : "bg-border-default"
+                      : steps[i + 1]?.skipped
+                        ? "bg-semantic-error/20"
+                        : "bg-border-default"
                   }`}
                 />
               )}
@@ -593,7 +633,11 @@ function GovernancePipeline({
               <div className="flex items-center gap-2">
                 <span
                   className={`text-sm font-medium ${
-                    step.reached ? "text-text-primary" : "text-text-subtle"
+                    step.reached
+                      ? "text-text-primary"
+                      : step.skipped
+                        ? "text-text-subtle line-through"
+                        : "text-text-subtle"
                   }`}
                 >
                   {step.label}
@@ -610,7 +654,7 @@ function GovernancePipeline({
                   </a>
                 )}
               </div>
-              <p className="text-xs text-text-muted">{step.detail}</p>
+              <p className={`text-xs ${step.skipped ? "text-semantic-error/60" : "text-text-muted"}`}>{step.detail}</p>
 
               {/* Collapsible vote ledger under the Voted step */}
               {step.label === "Voted" && step.reached && votes.length > 0 && (
