@@ -146,6 +146,7 @@ export default function ProposalDetailPage({
           proposalEta={proposalEta}
           forVotes={forVotes}
           againstVotes={againstVotes}
+          abstainVotes={abstainVotes}
         />
 
         {body && (
@@ -284,6 +285,7 @@ function StateGuidance({
   proposalEta,
   forVotes,
   againstVotes,
+  abstainVotes,
 }: {
   state: number | undefined;
   voteEnd: bigint;
@@ -291,6 +293,7 @@ function StateGuidance({
   proposalEta: bigint | undefined;
   forVotes: bigint;
   againstVotes: bigint;
+  abstainVotes: bigint;
 }) {
   if (state === undefined) return null;
 
@@ -299,6 +302,12 @@ function StateGuidance({
     : null;
 
   const timelockCountdown = formatTimelockCountdown(proposalEta);
+
+  const totalVotes = forVotes + againstVotes + abstainVotes;
+  const voteSummary =
+    totalVotes > 0n
+      ? `Voted ${forVotes.toString()} For, ${againstVotes.toString()} Against${abstainVotes > 0n ? `, ${abstainVotes.toString()} Abstain` : ""}.`
+      : null;
 
   const messages: Record<number, { text: string; color: string }> = {
     [ProposalState.Pending]: {
@@ -312,39 +321,37 @@ function StateGuidance({
       color: "text-semantic-info",
     },
     [ProposalState.Succeeded]: {
-      text: "This proposal passed! Queue it in the timelock to begin the waiting period before execution.",
+      text: `This proposal passed${voteSummary ? ` (${voteSummary})` : ""}. Queue it in the timelock to begin the waiting period before execution.`,
       color: "text-brand-green",
     },
     [ProposalState.Queued]: {
       text: timelockCountdown
-        ? `Executable in ~${timelockCountdown}. The Executor will perform a final sanctions check.`
-        : "This proposal is in the timelock waiting period. After the delay passes, it can be executed.",
+        ? `${voteSummary ? `${voteSummary} ` : ""}Executable in ~${timelockCountdown}. The Executor will perform a final sanctions check.`
+        : `${voteSummary ? `${voteSummary} ` : ""}This proposal is in the timelock waiting period. After the delay passes, it can be executed.`,
       color: "text-brand-amber",
     },
     [ProposalState.Executed]: {
-      text: "This proposal has been executed. The treasury action was completed successfully.",
+      text: `This proposal has been executed.${voteSummary ? ` ${voteSummary}` : ""} The treasury action was completed successfully.`,
       color: "text-brand-green",
     },
     [ProposalState.Defeated]: {
       text: `This proposal was defeated. ${
-        forVotes !== undefined && againstVotes !== undefined
-          ? forVotes > againstVotes
-            ? `It received ${forVotes.toString()} For vote${forVotes !== 1n ? "s" : ""} but did not reach the 10% quorum threshold.`
-            : againstVotes > forVotes
-              ? `It was voted down ${againstVotes.toString()} Against to ${forVotes.toString()} For.`
-              : forVotes === 0n && againstVotes === 0n
-                ? "No votes were cast — quorum was not reached."
-                : `It tied ${forVotes.toString()}-${againstVotes.toString()} and did not achieve a majority.`
-          : "It did not reach the required quorum or did not receive a majority of 'For' votes."
+        forVotes > againstVotes
+          ? `${voteSummary ?? ""} It did not reach the 10% quorum threshold.`
+          : againstVotes > forVotes
+            ? `It was voted down ${againstVotes.toString()} Against to ${forVotes.toString()} For.`
+            : totalVotes === 0n
+              ? "No votes were cast — quorum was not reached."
+              : `It tied ${forVotes.toString()}-${againstVotes.toString()} and did not achieve a majority.`
       }`,
       color: "text-semantic-error",
     },
     [ProposalState.Canceled]: {
-      text: "This proposal was canceled, possibly due to a sanctioned recipient being detected (Layer 2 defense).",
+      text: `This proposal was canceled${voteSummary ? ` (${voteSummary})` : ""}, possibly due to a sanctioned recipient being detected (Layer 2 defense).`,
       color: "text-semantic-error",
     },
     [ProposalState.Expired]: {
-      text: "This proposal succeeded but was not queued before the deadline expired.",
+      text: `This proposal succeeded${voteSummary ? ` (${voteSummary})` : ""} but was not queued before the deadline expired.`,
       color: "text-text-subtle",
     },
   };
