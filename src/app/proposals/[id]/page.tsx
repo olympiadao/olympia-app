@@ -139,7 +139,7 @@ export default function ProposalDetailPage({
               </span>
             )}
             <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-            {state !== undefined && <ProposalStatus state={state} />}
+            {state !== undefined && <ProposalStatus state={state} sanctioned={isCancellable} />}
           </div>
           <div className="mt-2 flex items-center gap-3 text-sm text-text-muted">
             <span>
@@ -228,6 +228,7 @@ export default function ProposalDetailPage({
           txHashes={txHashes}
           votes={votes}
           members={members}
+          sanctioned={isCancellable}
         />
       </div>
 
@@ -607,6 +608,7 @@ function GovernancePipeline({
   txHashes,
   votes,
   members,
+  sanctioned,
 }: {
   state: number | undefined;
   proposer: string;
@@ -622,6 +624,7 @@ function GovernancePipeline({
   };
   votes: VoteCastEvent[];
   members: Member[];
+  sanctioned?: boolean;
 }) {
   const totalVotes = forVotes + againstVotes + abstainVotes;
 
@@ -667,12 +670,25 @@ function GovernancePipeline({
         state !== undefined &&
         state !== ProposalState.Pending,
     },
+    ...(sanctioned
+      ? [
+          {
+            label: "Sanctioned",
+            detail:
+              "Recipient is on the sanctions list — awaiting cancellation",
+            reached: true,
+            skipped: true,
+          },
+        ]
+      : []),
     {
       label: "Queued",
       detail: txHashes.queueTxHash
         ? "Entered timelock"
-        : isTerminal
-          ? terminalLabel!
+        : isTerminal || sanctioned
+          ? sanctioned
+            ? "Blocked by sanctions"
+            : terminalLabel!
           : state === ProposalState.Succeeded
             ? "Ready to queue"
             : "Pending",
@@ -680,18 +696,20 @@ function GovernancePipeline({
       reached:
         state === ProposalState.Queued ||
         state === ProposalState.Executed,
-      skipped: isTerminal,
+      skipped: isTerminal || !!sanctioned,
     },
     {
       label: "Executed",
       detail: txHashes.executeTxHash
         ? "Treasury action completed"
-        : isTerminal
-          ? terminalLabel!
+        : isTerminal || sanctioned
+          ? sanctioned
+            ? "Blocked by sanctions"
+            : terminalLabel!
           : "Pending",
       txHash: txHashes.executeTxHash,
       reached: state === ProposalState.Executed,
-      skipped: isTerminal,
+      skipped: isTerminal || !!sanctioned,
     },
   ];
 
@@ -707,11 +725,13 @@ function GovernancePipeline({
             <div className="flex flex-col items-center">
               <div
                 className={`h-3 w-3 shrink-0 rounded-full border-2 ${
-                  step.reached
-                    ? "border-brand-green bg-brand-green"
-                    : step.skipped
-                      ? "border-semantic-error/40 bg-semantic-error/20"
-                      : "border-border-default bg-bg-elevated"
+                  step.reached && step.skipped
+                    ? "border-semantic-error bg-semantic-error"
+                    : step.reached
+                      ? "border-brand-green bg-brand-green"
+                      : step.skipped
+                        ? "border-semantic-error/40 bg-semantic-error/20"
+                        : "border-border-default bg-bg-elevated"
                 }`}
               />
               {i < steps.length - 1 && (

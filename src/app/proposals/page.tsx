@@ -20,6 +20,8 @@ import {
   proposalCategoryColors,
   stripMarkdown,
 } from "@/lib/utils/proposal-categories";
+import { decodeProposalActions } from "@/lib/utils/decode-actions";
+import { useCheckSanction } from "@/lib/hooks/use-admin";
 
 export default function ProposalsPage() {
   const { proposals, isLoading, error } = useProposals();
@@ -105,6 +107,9 @@ export default function ProposalsPage() {
               blockNumber={p.blockNumber}
               voteEnd={p.voteEnd}
               blockStats={blockStats}
+              targets={p.targets}
+              values={p.values}
+              calldatas={p.calldatas}
             />
           ))}
         </div>
@@ -120,6 +125,9 @@ function ProposalCard({
   blockNumber,
   voteEnd,
   blockStats,
+  targets,
+  values,
+  calldatas,
 }: {
   proposalId: bigint;
   description: string;
@@ -127,11 +135,25 @@ function ProposalCard({
   blockNumber: bigint;
   voteEnd: bigint;
   blockStats: { currentBlock: number; avgBlockTimeMs: number } | undefined;
+  targets: readonly `0x${string}`[];
+  values: readonly bigint[];
+  calldatas: readonly `0x${string}`[];
 }) {
   const { state } = useProposalState(proposalId);
   const parsed = parseProposalDescription(description);
   const title = parsed.title;
   const body = parsed.body;
+
+  const treasuryRecipient = decodeProposalActions(targets, values, calldatas)
+    .find((a) => a.recipient)?.recipient;
+  const { data: recipientSanctioned } = useCheckSanction(treasuryRecipient);
+  const isSanctioned =
+    recipientSanctioned === true &&
+    state !== undefined &&
+    state !== ProposalState.Defeated &&
+    state !== ProposalState.Canceled &&
+    state !== ProposalState.Executed &&
+    state !== ProposalState.Expired;
 
   let countdown: string | null = null;
   if (state === ProposalState.Active && blockStats) {
@@ -144,7 +166,7 @@ function ProposalCard({
 
   return (
     <Link href={`/proposals/${proposalId.toString()}`}>
-      <Card className="transition-colors hover:border-border-brand">
+      <Card className={`transition-colors hover:border-border-brand ${isSanctioned ? "border-semantic-error/30" : ""}`}>
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -173,7 +195,7 @@ function ProposalCard({
               )}
             </div>
           </div>
-          {state !== undefined && <ProposalStatus state={state} />}
+          {state !== undefined && <ProposalStatus state={state} sanctioned={isSanctioned} />}
         </div>
       </Card>
     </Link>
