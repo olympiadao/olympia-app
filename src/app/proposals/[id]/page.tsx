@@ -460,7 +460,7 @@ function StateGuidance({
               {voteEnd.toString()}
             </p>
           )}
-          {proposalEta && state === ProposalState.Queued && (
+          {proposalEta !== undefined && proposalEta > 0n && state === ProposalState.Queued && (
             <p className="mt-1 font-mono text-xs text-text-subtle">
               Executable after{" "}
               {new Date(Number(proposalEta) * 1000).toLocaleString()}
