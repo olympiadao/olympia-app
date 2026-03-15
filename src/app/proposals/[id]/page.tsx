@@ -23,6 +23,8 @@ import type { Member } from "@/lib/hooks/use-member-nft";
 import { truncateAddress, formatEtc, explorerUrl } from "@/lib/utils/format";
 import { decodeProposalActions } from "@/lib/utils/decode-actions";
 import { useProposalTxHashes } from "@/lib/hooks/use-proposal-events";
+import { useCheckSanction } from "@/lib/hooks/use-admin";
+import { useCancelIfSanctioned } from "@/lib/hooks/use-proposal-actions";
 import { ProposalState } from "@/lib/utils/proposal-states";
 import {
   parseProposalDescription,
@@ -34,7 +36,7 @@ import {
   estimateTimeMs,
   formatCountdown,
 } from "@/lib/utils/block-time";
-import { Info, Clock, Play, ExternalLink, ChevronDown } from "lucide-react";
+import { Info, Clock, Play, ExternalLink, ChevronDown, ShieldAlert } from "lucide-react";
 import Markdown from "react-markdown";
 
 export default function ProposalDetailPage({
@@ -68,8 +70,22 @@ export default function ProposalDetailPage({
     isSuccess: executeSuccess,
     error: executeError,
   } = useExecuteProposal();
+  const {
+    cancelIfSanctioned,
+    isPending: cancelPending,
+    isConfirming: cancelConfirming,
+    isSuccess: cancelSuccess,
+    error: cancelError,
+  } = useCancelIfSanctioned();
 
   const proposal = proposals.find((p) => p.proposalId.toString() === id);
+
+  // Extract treasury recipient for sanctions check (must be before early returns)
+  const treasuryRecipient = proposal
+    ? decodeProposalActions(proposal.targets, proposal.values, proposal.calldatas)
+        .find((a) => a.recipient)?.recipient
+    : undefined;
+  const { data: recipientSanctioned } = useCheckSanction(treasuryRecipient);
 
   if (isLoading) {
     return <p className="text-sm text-text-muted">Loading…</p>;
@@ -87,6 +103,9 @@ export default function ProposalDetailPage({
   const isActive = state === ProposalState.Active;
   const isSucceeded = state === ProposalState.Succeeded;
   const isQueued = state === ProposalState.Queued;
+  const isCancellable =
+    recipientSanctioned === true &&
+    (isActive || isSucceeded || isQueued);
 
   function handleQueue() {
     queue(
@@ -148,6 +167,38 @@ export default function ProposalDetailPage({
           againstVotes={againstVotes}
           abstainVotes={abstainVotes}
         />
+
+        {/* Sanctions alert — Layer 2 defense */}
+        {isCancellable && (
+          <Card className="border-semantic-error/40 bg-semantic-error/10">
+            <div className="flex items-start gap-2">
+              <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-semantic-error" />
+              <div className="text-xs">
+                <p className="font-medium text-semantic-error">
+                  Sanctioned Recipient Detected
+                </p>
+                <p className="mt-1 text-semantic-error/80">
+                  The treasury recipient{" "}
+                  <a
+                    href={explorerUrl("address", treasuryRecipient!)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-0.5 font-mono text-semantic-error underline"
+                  >
+                    {truncateAddress(treasuryRecipient!)}
+                    <ExternalLink className="h-2.5 w-2.5" />
+                  </a>{" "}
+                  is currently on the sanctions list. This proposal can be
+                  canceled by anyone using the Layer 2 defense (
+                  <code className="rounded bg-semantic-error/20 px-1">
+                    cancelIfSanctioned
+                  </code>
+                  ).
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {body && (
           <Card>
@@ -269,6 +320,44 @@ export default function ProposalDetailPage({
             {executeError && (
               <p className="mt-2 text-xs text-semantic-error">
                 {executeError.message.slice(0, 200)}
+              </p>
+            )}
+          </Card>
+        )}
+
+        {isCancellable && (
+          <Card className="border-semantic-error/40">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-semantic-error">
+                <ShieldAlert className="h-4 w-4" />
+                Cancel — Sanctioned Recipient
+              </CardTitle>
+            </CardHeader>
+            <p className="mb-3 text-xs text-text-muted">
+              The recipient is on the sanctions list. Anyone can invoke
+              Layer 2 defense to cancel this proposal.
+            </p>
+            <Button
+              variant="destructive"
+              size="md"
+              className="w-full"
+              onClick={() => cancelIfSanctioned(proposalId)}
+              disabled={cancelPending || cancelConfirming || cancelSuccess}
+            >
+              {cancelPending || cancelConfirming
+                ? "Canceling…"
+                : cancelSuccess
+                  ? "Canceled"
+                  : "Cancel Proposal"}
+            </Button>
+            {cancelSuccess && (
+              <p className="mt-2 text-xs text-brand-green">
+                Proposal canceled successfully.
+              </p>
+            )}
+            {cancelError && (
+              <p className="mt-2 text-xs text-semantic-error">
+                {cancelError.message.slice(0, 200)}
               </p>
             )}
           </Card>

@@ -50,3 +50,20 @@ export function useExecuteProposal() {
 
   return { execute, hash, isPending, isConfirming, isSuccess, error };
 }
+
+export function useCancelIfSanctioned() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } =
+    useWaitForTransactionReceipt({ hash });
+
+  function cancelIfSanctioned(proposalId: bigint) {
+    writeContract({
+      address: contracts[63].governor,
+      abi: abis.governor,
+      functionName: "cancelIfSanctioned",
+      args: [proposalId],
+    });
+  }
+
+  return { cancelIfSanctioned, hash, isPending, isConfirming, isSuccess, error };
+}
