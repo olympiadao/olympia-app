@@ -2,13 +2,35 @@
 
 import { useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { encodeFunctionData } from "viem";
+import { encodeFunctionData, BaseError, ContractFunctionRevertedError } from "viem";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { abis } from "@/lib/contracts/config";
 import { contracts } from "@/lib/contracts/addresses";
-import { Info } from "lucide-react";
+import { useCheckSanction } from "@/lib/hooks/use-admin";
+import { Info, ShieldAlert } from "lucide-react";
 import { PROPOSAL_CATEGORIES } from "@/lib/utils/proposal-categories";
+
+function parseContractError(error: Error): string {
+  if (error instanceof BaseError) {
+    const revertError = error.walk(
+      (e) => e instanceof ContractFunctionRevertedError
+    );
+    if (revertError instanceof ContractFunctionRevertedError) {
+      const name = revertError.data?.errorName;
+      if (name === "SanctionedRecipient" || name === "NoSanctionedRecipients") {
+        return "This recipient address is on the sanctions list. Proposals targeting sanctioned addresses are blocked by the Governor contract.";
+      }
+      return name ?? "Transaction reverted";
+    }
+    // User rejected in wallet
+    if (error.shortMessage?.includes("User rejected")) {
+      return "Transaction was rejected in your wallet.";
+    }
+    return error.shortMessage ?? error.message;
+  }
+  return error.message;
+}
 
 export default function NewProposalPage() {
   const [category, setCategory] = useState("");
@@ -17,9 +39,24 @@ export default function NewProposalPage() {
   const [targetAddress, setTargetAddress] = useState("");
   const [etcAmount, setEtcAmount] = useState("");
 
-  const { writeContract, data: hash, isPending } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } =
-    useWaitForTransactionReceipt({ hash });
+  const isValidAddress = /^0x[0-9a-fA-F]{40}$/.test(targetAddress);
+  const { data: isSanctioned } = useCheckSanction(
+    isValidAddress ? (targetAddress as `0x${string}`) : undefined
+  );
+
+  const {
+    writeContract,
+    data: hash,
+    isPending,
+    error: writeError,
+  } = useWriteContract();
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({ hash });
+
+  const error = writeError ?? receiptError;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -198,8 +235,22 @@ export default function NewProposalPage() {
                 value={targetAddress}
                 onChange={(e) => setTargetAddress(e.target.value)}
                 placeholder="0x…"
-                className="w-full rounded-lg border border-border-default bg-bg-elevated px-3 py-2 font-mono text-sm text-text-primary placeholder:text-text-subtle focus:border-brand-green focus:outline-none"
+                className={`w-full rounded-lg border bg-bg-elevated px-3 py-2 font-mono text-sm text-text-primary placeholder:text-text-subtle focus:outline-none ${
+                  isSanctioned === true
+                    ? "border-semantic-error focus:border-semantic-error"
+                    : "border-border-default focus:border-brand-green"
+                }`}
               />
+              {isSanctioned === true && (
+                <div className="mt-1.5 flex items-start gap-1.5 text-semantic-error">
+                  <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                  <p className="text-xs">
+                    This address is on the sanctions list. Proposals targeting
+                    sanctioned addresses will be rejected by the Governor
+                    contract.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
@@ -230,11 +281,25 @@ export default function NewProposalPage() {
           </p>
         )}
 
+        {error && (
+          <Card className="border-semantic-error/40 bg-semantic-error/10">
+            <div className="flex items-start gap-2">
+              <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-semantic-error" />
+              <div className="text-xs text-semantic-error">
+                <p className="font-medium">Transaction failed</p>
+                <p className="mt-1">{parseContractError(error)}</p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         <Button
           type="submit"
           size="lg"
           className="w-full"
-          disabled={!category || !title || isPending || isConfirming}
+          disabled={
+            !category || !title || isPending || isConfirming || isSanctioned === true
+          }
         >
           {isPending || isConfirming ? "Submitting…" : "Submit Proposal"}
         </Button>
