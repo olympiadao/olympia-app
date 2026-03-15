@@ -59,10 +59,10 @@ export default function ProposalsPage() {
               <FlowStep label="Pending" color="text-text-muted bg-bg-elevated" desc="Voting delay (1 block)" />
               <FlowArrow />
               <div className="flex flex-col items-center gap-1">
-                <FlowStep label="Active" color="text-semantic-info bg-semantic-info/10" desc="Voting open" />
+                <FlowStep label="Active" color="text-brand-green bg-brand-green-subtle" desc="Voting open" />
                 <div className="flex gap-2">
-                  <TerminalBranch label="Defeated" color="text-semantic-error" desc="No quorum or majority" />
-                  <TerminalBranch label="Canceled" color="text-semantic-error" desc="Sanctioned recipient" />
+                  <TerminalBranch label="Rejected" color="text-orange-400" desc="No quorum or majority" />
+                  <TerminalBranch label="Blocked" color="text-semantic-error" desc="Sanctioned recipient" />
                 </div>
               </div>
               <FlowArrow />
@@ -71,7 +71,7 @@ export default function ProposalsPage() {
                 <TerminalBranch label="Expired" color="text-text-subtle" desc="Not queued in time" />
               </div>
               <FlowArrow />
-              <FlowStep label="Queued" color="text-brand-amber bg-brand-amber-subtle" desc="Timelock (1 hour)" />
+              <FlowStep label="Queued" color="text-text-muted bg-bg-elevated" desc="Timelock (1 hour)" />
               <FlowArrow />
               <FlowStep label="Executed" color="text-brand-green bg-brand-green-subtle" desc="Complete" />
             </div>
@@ -147,6 +147,7 @@ function ProposalCard({
   const treasuryRecipient = decodeProposalActions(targets, values, calldatas)
     .find((a) => a.recipient)?.recipient;
   const { data: recipientSanctioned } = useCheckSanction(treasuryRecipient);
+  // Active threat: sanctioned recipient on a live proposal (can still cancel)
   const isSanctioned =
     recipientSanctioned === true &&
     state !== undefined &&
@@ -154,6 +155,10 @@ function ProposalCard({
     state !== ProposalState.Canceled &&
     state !== ProposalState.Executed &&
     state !== ProposalState.Expired;
+  // Terminal: proposal ended while recipient was sanctioned
+  const isBlocked =
+    recipientSanctioned === true &&
+    (state === ProposalState.Defeated || state === ProposalState.Canceled);
 
   let countdown: string | null = null;
   if (state === ProposalState.Active && blockStats) {
@@ -166,7 +171,7 @@ function ProposalCard({
 
   return (
     <Link href={`/proposals/${proposalId.toString()}`}>
-      <Card className={`transition-colors hover:border-border-brand ${isSanctioned ? "border-semantic-error/30" : ""}`}>
+      <Card className={`transition-colors hover:border-border-brand ${isSanctioned || isBlocked ? "border-semantic-error/30" : ""}`}>
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -195,7 +200,7 @@ function ProposalCard({
               )}
             </div>
           </div>
-          {state !== undefined && <ProposalStatus state={state} sanctioned={isSanctioned} />}
+          {state !== undefined && <ProposalStatus state={state} sanctioned={isSanctioned} blocked={isBlocked} />}
         </div>
       </Card>
     </Link>

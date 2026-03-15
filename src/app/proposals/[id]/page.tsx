@@ -106,6 +106,9 @@ export default function ProposalDetailPage({
   const isCancellable =
     recipientSanctioned === true &&
     (isActive || isSucceeded || isQueued);
+  const isBlocked =
+    recipientSanctioned === true &&
+    (state === ProposalState.Defeated || state === ProposalState.Canceled);
 
   function handleQueue() {
     queue(
@@ -139,7 +142,7 @@ export default function ProposalDetailPage({
               </span>
             )}
             <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-            {state !== undefined && <ProposalStatus state={state} sanctioned={isCancellable} />}
+            {state !== undefined && <ProposalStatus state={state} sanctioned={isCancellable} blocked={isBlocked} />}
           </div>
           <div className="mt-2 flex items-center gap-3 text-sm text-text-muted">
             <span>
@@ -166,6 +169,7 @@ export default function ProposalDetailPage({
           forVotes={forVotes}
           againstVotes={againstVotes}
           abstainVotes={abstainVotes}
+          blocked={isBlocked}
         />
 
         {/* Sanctions alert — Layer 2 defense */}
@@ -211,12 +215,6 @@ export default function ProposalDetailPage({
           </Card>
         )}
 
-        <ProposalActions
-          targets={proposal.targets}
-          values={proposal.values}
-          calldatas={proposal.calldatas}
-        />
-
         <GovernancePipeline
           state={state}
           proposer={proposal.proposer}
@@ -229,6 +227,13 @@ export default function ProposalDetailPage({
           votes={votes}
           members={members}
           sanctioned={isCancellable}
+        />
+
+        <ProposalActions
+          targets={proposal.targets}
+          values={proposal.values}
+          calldatas={proposal.calldatas}
+          state={state}
         />
       </div>
 
@@ -298,7 +303,7 @@ export default function ProposalDetailPage({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-brand-amber" />
+                <Clock className="h-4 w-4 text-text-muted" />
                 Queue Proposal
               </CardTitle>
             </CardHeader>
@@ -378,6 +383,7 @@ function StateGuidance({
   forVotes,
   againstVotes,
   abstainVotes,
+  blocked,
 }: {
   state: number | undefined;
   voteEnd: bigint;
@@ -386,6 +392,7 @@ function StateGuidance({
   forVotes: bigint;
   againstVotes: bigint;
   abstainVotes: bigint;
+  blocked?: boolean;
 }) {
   if (state === undefined) return null;
 
@@ -410,7 +417,7 @@ function StateGuidance({
       text: countdown
         ? `Voting closes in ~${countdown.time} (~${countdown.blocks} blocks remaining). 10% quorum required.`
         : `Voting is open until block #${voteEnd.toString()}. 10% quorum required.`,
-      color: "text-semantic-info",
+      color: "text-brand-green",
     },
     [ProposalState.Succeeded]: {
       text: `This proposal passed${voteSummary ? ` (${voteSummary})` : ""}. Queue it in the timelock to begin the waiting period before execution.`,
@@ -420,24 +427,29 @@ function StateGuidance({
       text: timelockCountdown
         ? `${voteSummary ? `${voteSummary} ` : ""}Executable in ~${timelockCountdown}. The Executor will perform a final sanctions check.`
         : `${voteSummary ? `${voteSummary} ` : ""}This proposal is in the timelock waiting period. After the delay passes, it can be executed.`,
-      color: "text-brand-amber",
+      color: "text-text-muted",
     },
     [ProposalState.Executed]: {
       text: `This proposal has been executed.${voteSummary ? ` ${voteSummary}` : ""} The treasury action was completed successfully.`,
       color: "text-brand-green",
     },
-    [ProposalState.Defeated]: {
-      text: `This proposal was defeated. ${
-        forVotes > againstVotes
-          ? `${voteSummary ?? ""} It did not reach the 10% quorum threshold.`
-          : againstVotes > forVotes
-            ? `It was voted down ${againstVotes.toString()} Against to ${forVotes.toString()} For.`
-            : totalVotes === 0n
-              ? "No votes were cast — quorum was not reached."
-              : `It tied ${forVotes.toString()}-${againstVotes.toString()} and did not achieve a majority.`
-      }`,
-      color: "text-semantic-error",
-    },
+    [ProposalState.Defeated]: blocked
+      ? {
+          text: "This proposal was blocked due to the treasury recipient being on the sanctions list.",
+          color: "text-semantic-error",
+        }
+      : {
+          text: `This proposal was rejected. ${
+            forVotes > againstVotes
+              ? `${voteSummary ?? ""} It did not reach the 10% quorum threshold.`
+              : againstVotes > forVotes
+                ? `It was voted down ${againstVotes.toString()} Against to ${forVotes.toString()} For.`
+                : totalVotes === 0n
+                  ? "No votes were cast — quorum was not reached."
+                  : `It tied ${forVotes.toString()}-${againstVotes.toString()} and did not achieve a majority.`
+          }`,
+          color: "text-orange-400",
+        },
     [ProposalState.Canceled]: {
       text: `This proposal was canceled${voteSummary ? ` (${voteSummary})` : ""}, possibly due to a sanctioned recipient being detected (Layer 2 defense).`,
       color: "text-semantic-error",
@@ -498,17 +510,48 @@ function ProposalActions({
   targets,
   values,
   calldatas,
+  state,
 }: {
   targets: readonly `0x${string}`[];
   values: readonly bigint[];
   calldatas: readonly `0x${string}`[];
+  state: number | undefined;
 }) {
   const actions = decodeProposalActions(targets, values, calldatas);
 
+  const isExecuted = state === ProposalState.Executed;
+  const isTerminal =
+    state === ProposalState.Defeated ||
+    state === ProposalState.Canceled ||
+    state === ProposalState.Expired;
+
+  const outcomeLabel = isExecuted
+    ? "Completed"
+    : state === ProposalState.Defeated
+      ? "Not executed — proposal rejected"
+      : state === ProposalState.Canceled
+        ? "Not executed — proposal canceled"
+        : state === ProposalState.Expired
+          ? "Not executed — proposal expired"
+          : null;
+
   return (
-    <Card>
+    <Card className={isTerminal ? "opacity-60" : undefined}>
       <CardHeader>
-        <CardTitle>On-Chain Actions</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Treasury Actions</CardTitle>
+          {outcomeLabel && (
+            <span
+              className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                isExecuted
+                  ? "bg-brand-green-subtle text-brand-green"
+                  : "bg-bg-elevated text-text-subtle"
+              }`}
+            >
+              {outcomeLabel}
+            </span>
+          )}
+        </div>
       </CardHeader>
       <div className="space-y-3">
         {actions.map((action, i) => (
@@ -562,9 +605,14 @@ function ProposalActions({
                 )}
                 {action.amount !== undefined && (
                   <ActionRow label="Amount">
-                    <span className="font-semibold text-brand-amber">
+                    <span className={`font-semibold ${isTerminal ? "text-text-subtle line-through" : "text-brand-amber"}`}>
                       {formatEtc(action.amount)} METC
                     </span>
+                  </ActionRow>
+                )}
+                {isTerminal && (
+                  <ActionRow label="Status">
+                    <span className="text-text-subtle">Not executed</span>
                   </ActionRow>
                 )}
               </tbody>
@@ -646,7 +694,7 @@ function GovernancePipeline({
 
   const terminalLabel =
     state === ProposalState.Defeated
-      ? "Proposal defeated"
+      ? "Proposal rejected"
       : state === ProposalState.Canceled
         ? "Proposal canceled"
         : state === ProposalState.Expired
@@ -716,7 +764,7 @@ function GovernancePipeline({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Governance Pipeline</CardTitle>
+        <CardTitle>Proposal Lifecycle</CardTitle>
       </CardHeader>
       <div className="space-y-0">
         {steps.map((step, i) => (

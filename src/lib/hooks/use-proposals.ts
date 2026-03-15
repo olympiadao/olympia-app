@@ -29,10 +29,11 @@ export function useProposals() {
 
   useEffect(() => {
     if (!client) return;
+    let isInitial = true;
 
     async function fetchProposals() {
       try {
-        setIsLoading(true);
+        if (isInitial) setIsLoading(true);
         const logs = await client!.getLogs({
           address: contracts[63].governor,
           event: proposalCreatedEvent,
@@ -54,9 +55,10 @@ export function useProposals() {
 
         setProposals(parsed.reverse());
       } catch (e) {
-        setError(e instanceof Error ? e : new Error("Failed to fetch proposals"));
+        if (isInitial) setError(e instanceof Error ? e : new Error("Failed to fetch proposals"));
       } finally {
-        setIsLoading(false);
+        if (isInitial) setIsLoading(false);
+        isInitial = false;
       }
     }
 

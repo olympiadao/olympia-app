@@ -10,7 +10,7 @@ export const PROPOSAL_CATEGORIES = [
 export type ProposalCategory = (typeof PROPOSAL_CATEGORIES)[number]["value"];
 
 export const proposalCategoryColors: Record<ProposalCategory, string> = {
-  SECURITY: "text-semantic-error bg-semantic-error/10",
+  SECURITY: "text-purple-400 bg-purple-400/10",
   INFRASTRUCTURE: "text-semantic-info bg-semantic-info/10",
   DEVELOPMENT: "text-brand-green bg-brand-green-subtle",
   GOVERNANCE: "text-brand-amber bg-brand-amber-subtle",
