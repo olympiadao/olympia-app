@@ -245,7 +245,46 @@ export default function ProposalDetailPage({
           />
         </Card>
 
-        {isActive && (
+        {isCancellable && (
+          <Card className="border-semantic-error/40">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-semantic-error">
+                <ShieldAlert className="h-4 w-4" />
+                Sanctioned Recipient
+              </CardTitle>
+            </CardHeader>
+            <p className="mb-3 text-xs text-text-muted">
+              The treasury recipient is on the sanctions list. This proposal
+              cannot be executed and should be canceled. If not canceled, it
+              will fail at execution time.
+            </p>
+            <Button
+              variant="destructive"
+              size="md"
+              className="w-full"
+              onClick={() => cancelIfSanctioned(proposalId)}
+              disabled={cancelPending || cancelConfirming || cancelSuccess}
+            >
+              {cancelPending || cancelConfirming
+                ? "Canceling…"
+                : cancelSuccess
+                  ? "Canceled"
+                  : "Cancel Proposal"}
+            </Button>
+            {cancelSuccess && (
+              <p className="mt-2 text-xs text-brand-green">
+                Proposal canceled successfully.
+              </p>
+            )}
+            {cancelError && (
+              <p className="mt-2 text-xs text-semantic-error">
+                {cancelError.message.slice(0, 200)}
+              </p>
+            )}
+          </Card>
+        )}
+
+        {isActive && !isCancellable && (
           <Card>
             <CardHeader>
               <CardTitle>Cast Your Vote</CardTitle>
@@ -325,43 +364,6 @@ export default function ProposalDetailPage({
           </Card>
         )}
 
-        {isCancellable && (
-          <Card className="border-semantic-error/40">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-semantic-error">
-                <ShieldAlert className="h-4 w-4" />
-                Cancel — Sanctioned Recipient
-              </CardTitle>
-            </CardHeader>
-            <p className="mb-3 text-xs text-text-muted">
-              The recipient is on the sanctions list. Anyone can invoke
-              Layer 2 defense to cancel this proposal.
-            </p>
-            <Button
-              variant="destructive"
-              size="md"
-              className="w-full"
-              onClick={() => cancelIfSanctioned(proposalId)}
-              disabled={cancelPending || cancelConfirming || cancelSuccess}
-            >
-              {cancelPending || cancelConfirming
-                ? "Canceling…"
-                : cancelSuccess
-                  ? "Canceled"
-                  : "Cancel Proposal"}
-            </Button>
-            {cancelSuccess && (
-              <p className="mt-2 text-xs text-brand-green">
-                Proposal canceled successfully.
-              </p>
-            )}
-            {cancelError && (
-              <p className="mt-2 text-xs text-semantic-error">
-                {cancelError.message.slice(0, 200)}
-              </p>
-            )}
-          </Card>
-        )}
       </div>
     </div>
   );
