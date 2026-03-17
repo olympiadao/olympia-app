@@ -227,6 +227,7 @@ export default function ProposalDetailPage({
           votes={votes}
           members={members}
           sanctioned={isCancellable}
+          blocked={isBlocked}
         />
 
         <ProposalActions
@@ -234,6 +235,10 @@ export default function ProposalDetailPage({
           values={proposal.values}
           calldatas={proposal.calldatas}
           state={state}
+          blocked={isBlocked}
+          forVotes={forVotes}
+          againstVotes={againstVotes}
+          abstainVotes={abstainVotes}
         />
       </div>
 
@@ -511,11 +516,19 @@ function ProposalActions({
   values,
   calldatas,
   state,
+  blocked,
+  forVotes,
+  againstVotes,
+  abstainVotes,
 }: {
   targets: readonly `0x${string}`[];
   values: readonly bigint[];
   calldatas: readonly `0x${string}`[];
   state: number | undefined;
+  blocked?: boolean;
+  forVotes: bigint;
+  againstVotes: bigint;
+  abstainVotes: bigint;
 }) {
   const actions = decodeProposalActions(targets, values, calldatas);
 
@@ -525,15 +538,32 @@ function ProposalActions({
     state === ProposalState.Canceled ||
     state === ProposalState.Expired;
 
+  const totalVotes = forVotes + againstVotes + abstainVotes;
+
   const outcomeLabel = isExecuted
     ? "Completed"
-    : state === ProposalState.Defeated
-      ? "Not executed — proposal rejected"
-      : state === ProposalState.Canceled
-        ? "Not executed — proposal canceled"
-        : state === ProposalState.Expired
-          ? "Not executed — proposal expired"
-          : null;
+    : blocked
+      ? "Not executed — sanctions block"
+      : state === ProposalState.Defeated
+        ? "Not executed — proposal rejected"
+        : state === ProposalState.Canceled
+          ? "Not executed — proposal canceled"
+          : state === ProposalState.Expired
+            ? "Not executed — proposal expired"
+            : null;
+
+  function statusDetail(): string {
+    if (blocked) return "Not executed. Sanctions block.";
+    if (state === ProposalState.Defeated) {
+      if (totalVotes === 0n) return "Not executed. No votes were cast — quorum was not reached.";
+      if (againstVotes > forVotes) return `Not executed. Voted down ${againstVotes.toString()} Against to ${forVotes.toString()} For.`;
+      if (forVotes > againstVotes) return `Not executed. Did not reach the 10% quorum threshold.`;
+      return `Not executed. Tied ${forVotes.toString()}-${againstVotes.toString()} and did not achieve a majority.`;
+    }
+    if (state === ProposalState.Canceled) return "Not executed. Proposal was canceled.";
+    if (state === ProposalState.Expired) return "Not executed. Proposal expired before it could be queued.";
+    return "Not executed";
+  }
 
   return (
     <Card className={isTerminal ? "opacity-60" : undefined}>
@@ -566,7 +596,7 @@ function ProposalActions({
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                   action.type === "Treasury Withdrawal"
-                    ? "bg-brand-amber-subtle text-brand-amber"
+                    ? "bg-brand-treasury-subtle text-brand-treasury"
                     : action.type === "Signaling"
                       ? "bg-brand-green-subtle text-brand-green"
                       : "bg-bg-elevated text-text-muted"
@@ -605,14 +635,16 @@ function ProposalActions({
                 )}
                 {action.amount !== undefined && (
                   <ActionRow label="Amount">
-                    <span className={`font-semibold ${isTerminal ? "text-text-subtle line-through" : "text-brand-amber"}`}>
+                    <span className={`font-semibold ${isTerminal ? "text-text-subtle line-through" : "text-brand-treasury"}`}>
                       {formatEtc(action.amount)} METC
                     </span>
                   </ActionRow>
                 )}
                 {isTerminal && (
                   <ActionRow label="Status">
-                    <span className="text-text-subtle">Not executed</span>
+                    <span className={blocked ? "text-semantic-error" : "text-text-subtle"}>
+                      {statusDetail()}
+                    </span>
                   </ActionRow>
                 )}
               </tbody>
@@ -657,6 +689,7 @@ function GovernancePipeline({
   votes,
   members,
   sanctioned,
+  blocked,
 }: {
   state: number | undefined;
   proposer: string;
@@ -673,6 +706,7 @@ function GovernancePipeline({
   votes: VoteCastEvent[];
   members: Member[];
   sanctioned?: boolean;
+  blocked?: boolean;
 }) {
   const totalVotes = forVotes + againstVotes + abstainVotes;
 
@@ -693,13 +727,17 @@ function GovernancePipeline({
     state === ProposalState.Expired;
 
   const terminalLabel =
-    state === ProposalState.Defeated
-      ? "Proposal rejected"
-      : state === ProposalState.Canceled
-        ? "Proposal canceled"
-        : state === ProposalState.Expired
-          ? "Proposal expired"
-          : undefined;
+    blocked
+      ? "Proposal blocked"
+      : state === ProposalState.Defeated
+        ? "Proposal rejected"
+        : state === ProposalState.Canceled
+          ? "Proposal canceled"
+          : state === ProposalState.Expired
+            ? "Proposal expired"
+            : undefined;
+
+  const isRejected = state === ProposalState.Defeated && !blocked;
 
   const steps = [
     {
@@ -707,6 +745,8 @@ function GovernancePipeline({
       detail: `by ${truncateAddress(proposer)} at block #${blockNumber.toString()}`,
       txHash: txHashes.createTxHash,
       reached: state !== undefined,
+      skipped: false,
+      rejected: false,
     },
     {
       label: "Voted",
@@ -717,6 +757,8 @@ function GovernancePipeline({
       reached:
         state !== undefined &&
         state !== ProposalState.Pending,
+      skipped: false,
+      rejected: false,
     },
     ...(sanctioned
       ? [
@@ -726,6 +768,7 @@ function GovernancePipeline({
               "Recipient is on the sanctions list — awaiting cancellation",
             reached: true,
             skipped: true,
+            rejected: false,
           },
         ]
       : []),
@@ -745,6 +788,7 @@ function GovernancePipeline({
         state === ProposalState.Queued ||
         state === ProposalState.Executed,
       skipped: isTerminal || !!sanctioned,
+      rejected: isRejected,
     },
     {
       label: "Executed",
@@ -758,6 +802,7 @@ function GovernancePipeline({
       txHash: txHashes.executeTxHash,
       reached: state === ProposalState.Executed,
       skipped: isTerminal || !!sanctioned,
+      rejected: isRejected,
     },
   ];
 
@@ -774,11 +819,15 @@ function GovernancePipeline({
               <div
                 className={`h-3 w-3 shrink-0 rounded-full border-2 ${
                   step.reached && step.skipped
-                    ? "border-semantic-error bg-semantic-error"
+                    ? step.rejected
+                      ? "border-orange-400 bg-orange-400"
+                      : "border-semantic-error bg-semantic-error"
                     : step.reached
                       ? "border-brand-green bg-brand-green"
                       : step.skipped
-                        ? "border-semantic-error/40 bg-semantic-error/20"
+                        ? step.rejected
+                          ? "border-orange-400/40 bg-orange-400/20"
+                          : "border-semantic-error/40 bg-semantic-error/20"
                         : "border-border-default bg-bg-elevated"
                 }`}
               />
@@ -788,7 +837,9 @@ function GovernancePipeline({
                     steps[i + 1]?.reached
                       ? "bg-brand-green"
                       : steps[i + 1]?.skipped
-                        ? "bg-semantic-error/20"
+                        ? steps[i + 1]?.rejected
+                          ? "bg-orange-400/20"
+                          : "bg-semantic-error/20"
                         : "bg-border-default"
                   }`}
                 />
@@ -820,7 +871,7 @@ function GovernancePipeline({
                   </a>
                 )}
               </div>
-              <p className={`text-xs ${step.skipped ? "text-semantic-error/60" : "text-text-muted"}`}>{step.detail}</p>
+              <p className={`text-xs ${step.skipped ? (step.rejected ? "text-orange-400/60" : "text-semantic-error/60") : "text-text-muted"}`}>{step.detail}</p>
 
               {/* Collapsible vote ledger under the Voted step */}
               {step.label === "Voted" && step.reached && votes.length > 0 && (

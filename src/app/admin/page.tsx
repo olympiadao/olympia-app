@@ -45,7 +45,7 @@ export default function AdminPage() {
       <div className="space-y-6">
         <PageHeader />
         <Card className="py-12 text-center">
-          <AlertTriangle className="mx-auto h-8 w-8 text-brand-amber" />
+          <AlertTriangle className="mx-auto h-8 w-8 text-semantic-warning" />
           <p className="mt-3 text-lg font-semibold text-text-primary">
             Not Authorized
           </p>
@@ -224,7 +224,7 @@ function SanctionsSection() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-brand-amber" />
+          <AlertTriangle className="h-4 w-4 text-semantic-warning" />
           Sanctions Management
         </CardTitle>
       </CardHeader>

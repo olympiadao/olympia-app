@@ -10,10 +10,10 @@
   --color-brand-green-subtle: rgba(0, 255, 174, 0.08);
   --color-brand-green-glow: rgba(0, 255, 174, 0.4);
 
-  /* Brand Amber (treasury) */
-  --color-brand-amber: #f59e0b;
-  --color-brand-amber-hover: #d97706;
-  --color-brand-amber-subtle: rgba(245, 158, 11, 0.08);
+  /* Brand Treasury (neutral white/slate — institutional) */
+  --color-brand-treasury: #e2e8f0;
+  --color-brand-treasury-hover: #cbd5e1;
+  --color-brand-treasury-subtle: rgba(226, 232, 240, 0.08);
 
   /* Dark backgrounds */
   --color-bg-primary: #0a0f10;

@@ -20,6 +20,8 @@ import {
   parseProposalDescription,
   proposalCategoryColors,
 } from "@/lib/utils/proposal-categories";
+import { decodeProposalActions } from "@/lib/utils/decode-actions";
+import { useCheckSanction } from "@/lib/hooks/use-admin";
 
 export default function Dashboard() {
   const { proposals, isLoading: proposalsLoading } = useProposals();
@@ -43,7 +45,7 @@ export default function Dashboard() {
           value={proposalsLoading ? "…" : proposals.length.toString()}
         />
         <StatCard
-          icon={<Landmark className="h-5 w-5 text-brand-amber" />}
+          icon={<Landmark className="h-5 w-5 text-brand-treasury" />}
           label="Treasury"
           value={balance ? `${formatEtc(balance.value)} METC` : "…"}
         />
@@ -132,6 +134,9 @@ export default function Dashboard() {
                 description={p.description}
                 voteEnd={p.voteEnd}
                 blockStats={blockStats}
+                targets={p.targets}
+                values={p.values}
+                calldatas={p.calldatas}
               />
             ))}
           </div>
@@ -168,14 +173,34 @@ function ProposalRow({
   description,
   voteEnd,
   blockStats,
+  targets,
+  values,
+  calldatas,
 }: {
   proposalId: bigint;
   description: string;
   voteEnd: bigint;
   blockStats: { currentBlock: number; avgBlockTimeMs: number } | undefined;
+  targets: readonly `0x${string}`[];
+  values: readonly bigint[];
+  calldatas: readonly `0x${string}`[];
 }) {
   const { state } = useProposalState(proposalId);
   const parsed = parseProposalDescription(description);
+
+  const treasuryRecipient = decodeProposalActions(targets, values, calldatas)
+    .find((a) => a.recipient)?.recipient;
+  const { data: recipientSanctioned } = useCheckSanction(treasuryRecipient);
+  const isSanctioned =
+    recipientSanctioned === true &&
+    state !== undefined &&
+    state !== ProposalState.Defeated &&
+    state !== ProposalState.Canceled &&
+    state !== ProposalState.Executed &&
+    state !== ProposalState.Expired;
+  const isBlocked =
+    recipientSanctioned === true &&
+    (state === ProposalState.Defeated || state === ProposalState.Canceled);
 
   let countdown: string | null = null;
   if (state === ProposalState.Active && blockStats) {
@@ -188,7 +213,7 @@ function ProposalRow({
 
   return (
     <Link href={`/proposals/${proposalId.toString()}`}>
-      <Card className="flex items-center justify-between transition-colors hover:border-border-brand">
+      <Card className={`flex items-center justify-between transition-colors hover:border-border-brand ${isSanctioned || isBlocked ? "border-semantic-error/30" : ""}`}>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             {parsed.category && (
@@ -209,7 +234,7 @@ function ProposalRow({
             #{proposalId.toString().slice(0, 8)}…
           </p>
         </div>
-        {state !== undefined && <ProposalStatus state={state} />}
+        {state !== undefined && <ProposalStatus state={state} sanctioned={isSanctioned} blocked={isBlocked} />}
       </Card>
     </Link>
   );

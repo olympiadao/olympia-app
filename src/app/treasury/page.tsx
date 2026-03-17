@@ -20,12 +20,12 @@ export default function TreasuryPage() {
 
       <Card>
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-amber-subtle">
-            <Landmark className="h-6 w-6 text-brand-amber" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-treasury-subtle">
+            <Landmark className="h-6 w-6 text-brand-treasury" />
           </div>
           <div>
             <p className="text-sm text-text-muted">Treasury Balance</p>
-            <p className="text-3xl font-bold tracking-tight text-brand-amber">
+            <p className="text-3xl font-bold tracking-tight text-brand-treasury">
               {isLoading ? "…" : balance ? `${formatEtc(balance.value)} METC` : "0 METC"}
             </p>
           </div>

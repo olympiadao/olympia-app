@@ -13,7 +13,7 @@ export const proposalCategoryColors: Record<ProposalCategory, string> = {
   SECURITY: "text-purple-400 bg-purple-400/10",
   INFRASTRUCTURE: "text-semantic-info bg-semantic-info/10",
   DEVELOPMENT: "text-brand-green bg-brand-green-subtle",
-  GOVERNANCE: "text-brand-amber bg-brand-amber-subtle",
+  GOVERNANCE: "text-teal-400 bg-teal-400/10",
   COMMUNITY: "text-text-muted bg-bg-elevated",
   OPERATIONS: "text-text-muted bg-bg-elevated",
 };
