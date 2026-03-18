@@ -3,7 +3,8 @@
 import { usePublicClient } from "wagmi";
 import { useEffect, useState } from "react";
 import { parseAbiItem } from "viem";
-import { contracts } from "@/lib/contracts/addresses";
+import { getContracts } from "@/lib/contracts/addresses";
+import { useActiveChainId } from "./use-chain";
 
 const proposalCreatedEvent = parseAbiItem(
   "event ProposalCreated(uint256 proposalId, address proposer, address[] targets, uint256[] values, string[] signatures, bytes[] calldatas, uint256 voteStart, uint256 voteEnd, string description)"
@@ -25,6 +26,8 @@ export interface ProposalTxHashes {
 
 export function useProposalTxHashes(proposalId: bigint) {
   const client = usePublicClient();
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const [hashes, setHashes] = useState<ProposalTxHashes>({});
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,19 +38,19 @@ export function useProposalTxHashes(proposalId: bigint) {
       try {
         const [createLogs, queueLogs, executeLogs] = await Promise.all([
           client!.getLogs({
-            address: contracts[63].governor,
+            address: c.governor,
             event: proposalCreatedEvent,
             fromBlock: 15_700_000n,
             toBlock: "latest",
           }),
           client!.getLogs({
-            address: contracts[63].governor,
+            address: c.governor,
             event: proposalQueuedEvent,
             fromBlock: 15_700_000n,
             toBlock: "latest",
           }),
           client!.getLogs({
-            address: contracts[63].governor,
+            address: c.governor,
             event: proposalExecutedEvent,
             fromBlock: 15_700_000n,
             toBlock: "latest",
@@ -79,7 +82,7 @@ export function useProposalTxHashes(proposalId: bigint) {
     fetchHashes();
     const interval = setInterval(fetchHashes, 60_000);
     return () => clearInterval(interval);
-  }, [client, proposalId]);
+  }, [client, proposalId, c.governor]);
 
   return { ...hashes, isLoading };
 }

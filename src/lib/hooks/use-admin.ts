@@ -7,7 +7,8 @@ import {
   useAccount,
 } from "wagmi";
 import { abis } from "@/lib/contracts/config";
-import { contracts } from "@/lib/contracts/addresses";
+import { getContracts } from "@/lib/contracts/addresses";
+import { useActiveChainId } from "./use-chain";
 
 // Role constants (keccak256 hashes)
 export const ROLES = {
@@ -24,13 +25,15 @@ export const ROLES = {
 // --- Mint NFT ---
 
 export function useMintNFT() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } =
     useWaitForTransactionReceipt({ hash });
 
   function mint(to: `0x${string}`) {
     writeContract({
-      address: contracts[63].memberNFT,
+      address: c.memberNFT,
       abi: abis.memberNFT,
       functionName: "safeMint",
       args: [to],
@@ -43,13 +46,15 @@ export function useMintNFT() {
 // --- Sanctions ---
 
 export function useAddSanction() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } =
     useWaitForTransactionReceipt({ hash });
 
   function addSanction(address: `0x${string}`) {
     writeContract({
-      address: contracts[63].sanctionsOracle,
+      address: c.sanctionsOracle,
       abi: abis.sanctionsOracle,
       functionName: "addAddress",
       args: [address],
@@ -60,13 +65,15 @@ export function useAddSanction() {
 }
 
 export function useRemoveSanction() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } =
     useWaitForTransactionReceipt({ hash });
 
   function removeSanction(address: `0x${string}`) {
     writeContract({
-      address: contracts[63].sanctionsOracle,
+      address: c.sanctionsOracle,
       abi: abis.sanctionsOracle,
       functionName: "removeAddress",
       args: [address],
@@ -77,8 +84,10 @@ export function useRemoveSanction() {
 }
 
 export function useCheckSanction(address?: `0x${string}`) {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   return useReadContract({
-    address: contracts[63].sanctionsOracle,
+    address: c.sanctionsOracle,
     abi: abis.sanctionsOracle,
     functionName: "isSanctioned",
     args: address ? [address] : undefined,
@@ -93,6 +102,8 @@ export function useHasRole(
   role: `0x${string}`,
   account?: `0x${string}`
 ) {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const abiMap = {
     memberNFT: abis.memberNFT,
     sanctionsOracle: abis.sanctionsOracle,
@@ -100,7 +111,7 @@ export function useHasRole(
   };
 
   return useReadContract({
-    address: contracts[63][contract],
+    address: c[contract],
     abi: abiMap[contract],
     functionName: "hasRole",
     args: account ? [role, account] : undefined,

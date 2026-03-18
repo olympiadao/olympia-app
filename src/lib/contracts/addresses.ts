@@ -1,16 +1,22 @@
+// Demo v0.2 — deterministic CREATE2 deployment (identical on both chains)
+const V0_2_ADDRESSES = {
+  governor: "0xb85dbc899472756470ef4033b9637ff8fa2fd23d" as const,
+  executor: "0x64624f74f77639cba268a6c8bedc2778b707ef9a" as const,
+  timelock: "0xa5839b3e9445f7ee7affdbc796dc0601f9b976c2" as const,
+  ecfpRegistry: "0xfb4de5674a6b9a301d16876795a74f3bdacfa722" as const,
+  sanctionsOracle: "0xff2b8d7937d908d81c72d20ac99302ee6acc2709" as const,
+  memberNFT: "0x73e78d3a3470396325b975fcafa8105a89a9e672" as const,
+  treasury: "0x035b2e3c189B772e52F4C3DA6c45c84A3bB871bf" as const,
+} as const;
+
 export const contracts = {
-  63: {
-    governor: "0xEdbD61F1cE825CF939beBB422F8C914a69826dDA" as const,
-    executor: "0x94d4f74dDdE715Ed195B597A3434713690B14e97" as const,
-    timelock: "0x1E0fADee5540a77012f1944fcce58677fC087f6e" as const,
-    ecfpRegistry: "0xcB532fe70299D53Cc81B5F6365f56A108784d05d" as const,
-    sanctionsOracle: "0xEeeb33c8b7C936bD8e72A859a3e1F9cc8A26f3B4" as const,
-    memberNFT: "0x720676EBfe45DECfC43c8E9870C64413a2480EE0" as const,
-    treasury: "0xd6165F3aF4281037bce810621F62B43077Fb0e37" as const,
-  },
+  61: V0_2_ADDRESSES,
+  63: V0_2_ADDRESSES,
 } as const;
 
 export type SupportedChainId = keyof typeof contracts;
+
+export type ContractName = keyof typeof V0_2_ADDRESSES;
 
 export function getContracts(chainId: number) {
   const c = contracts[chainId as SupportedChainId];

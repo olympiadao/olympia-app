@@ -6,7 +6,7 @@ import { encodeFunctionData, BaseError, ContractFunctionRevertedError } from "vi
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { abis } from "@/lib/contracts/config";
-import { contracts } from "@/lib/contracts/addresses";
+import { useChainContracts } from "@/lib/hooks/use-chain";
 import { useCheckSanction } from "@/lib/hooks/use-admin";
 import { Info, ShieldAlert } from "lucide-react";
 import { PROPOSAL_CATEGORIES } from "@/lib/utils/proposal-categories";
@@ -33,6 +33,7 @@ function parseContractError(error: Error): string {
 }
 
 export default function NewProposalPage() {
+  const contracts = useChainContracts();
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -78,11 +79,11 @@ export default function NewProposalPage() {
       });
 
       writeContract({
-        address: contracts[63].governor,
+        address: contracts.governor,
         abi: abis.governor,
         functionName: "propose",
         args: [
-          [contracts[63].executor],
+          [contracts.executor],
           [0n],
           [calldata],
           fullDescription,
@@ -91,11 +92,11 @@ export default function NewProposalPage() {
     } else {
       // Signaling proposal (no-op)
       writeContract({
-        address: contracts[63].governor,
+        address: contracts.governor,
         abi: abis.governor,
         functionName: "propose",
         args: [
-          [contracts[63].governor],
+          [contracts.governor],
           [0n],
           ["0x" as `0x${string}`],
           fullDescription,

@@ -1,13 +1,15 @@
 "use client";
 
 import { useBalance } from "wagmi";
-import { contracts } from "@/lib/contracts/addresses";
-import { mordor } from "@/lib/utils/mordor";
+import { getContracts } from "@/lib/contracts/addresses";
+import { useActiveChainId } from "./use-chain";
 
 export function useTreasuryBalance() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   return useBalance({
-    address: contracts[63].treasury,
-    chainId: mordor.id,
+    address: c.treasury,
+    chainId,
     query: { refetchInterval: 60_000 },
   });
 }

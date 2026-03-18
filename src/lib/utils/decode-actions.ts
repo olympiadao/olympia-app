@@ -1,6 +1,6 @@
 import { decodeFunctionData, formatEther } from "viem";
 import ExecutorABI from "@/lib/contracts/abis/OlympiaExecutor.json";
-import { contracts } from "@/lib/contracts/addresses";
+import { getContracts } from "@/lib/contracts/addresses";
 
 export interface DecodedAction {
   type: "Treasury Withdrawal" | "Signaling" | "Unknown";
@@ -15,11 +15,12 @@ export interface DecodedAction {
 export function decodeProposalActions(
   targets: readonly `0x${string}`[],
   values: readonly bigint[],
-  calldatas: readonly `0x${string}`[]
+  calldatas: readonly `0x${string}`[],
+  chainId: number = 63
 ): DecodedAction[] {
   return targets.map((target, i) => {
     const calldata = calldatas[i] ?? ("0x" as `0x${string}`);
-    const targetLabel = resolveTargetLabel(target);
+    const targetLabel = resolveTargetLabel(target, chainId);
 
     // Signaling proposal — empty calldata
     if (calldata === "0x" || calldata.length <= 2) {
@@ -63,8 +64,8 @@ export function decodeProposalActions(
   });
 }
 
-function resolveTargetLabel(address: `0x${string}`): string {
-  const c = contracts[63];
+function resolveTargetLabel(address: `0x${string}`, chainId: number): string {
+  const c = getContracts(chainId);
   const labels: Record<string, string> = {
     [c.executor.toLowerCase()]: "OlympiaExecutor",
     [c.governor.toLowerCase()]: "OlympiaGovernor",

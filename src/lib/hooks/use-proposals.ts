@@ -3,7 +3,8 @@
 import { usePublicClient } from "wagmi";
 import { useEffect, useState } from "react";
 import { type Log, parseAbiItem } from "viem";
-import { contracts } from "@/lib/contracts/addresses";
+import { getContracts } from "@/lib/contracts/addresses";
+import { useActiveChainId } from "./use-chain";
 
 export interface ProposalCreatedEvent {
   proposalId: bigint;
@@ -23,19 +24,21 @@ const proposalCreatedEvent = parseAbiItem(
 
 export function useProposals() {
   const client = usePublicClient();
+  const chainId = useActiveChainId();
   const [proposals, setProposals] = useState<ProposalCreatedEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (!client) return;
+    const c = getContracts(chainId);
     let isInitial = true;
 
     async function fetchProposals() {
       try {
         if (isInitial) setIsLoading(true);
         const logs = await client!.getLogs({
-          address: contracts[63].governor,
+          address: c.governor,
           event: proposalCreatedEvent,
           fromBlock: 15_700_000n,
           toBlock: "latest",
@@ -65,7 +68,7 @@ export function useProposals() {
     fetchProposals();
     const interval = setInterval(fetchProposals, 60_000);
     return () => clearInterval(interval);
-  }, [client]);
+  }, [client, chainId]);
 
   return { proposals, isLoading, error };
 }

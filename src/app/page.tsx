@@ -22,6 +22,7 @@ import {
 } from "@/lib/utils/proposal-categories";
 import { decodeProposalActions } from "@/lib/utils/decode-actions";
 import { useCheckSanction } from "@/lib/hooks/use-admin";
+import { useActiveChainId } from "@/lib/hooks/use-chain";
 
 export default function Dashboard() {
   const { proposals, isLoading: proposalsLoading } = useProposals();
@@ -34,7 +35,7 @@ export default function Dashboard() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="mt-1 text-sm text-text-muted">
-          Olympia CoreDAO Governance — Demo v0.1
+          Olympia CoreDAO Governance — Demo v0.2
         </p>
       </div>
 
@@ -186,9 +187,10 @@ function ProposalRow({
   calldatas: readonly `0x${string}`[];
 }) {
   const { state } = useProposalState(proposalId);
+  const chainId = useActiveChainId();
   const parsed = parseProposalDescription(description);
 
-  const treasuryRecipient = decodeProposalActions(targets, values, calldatas)
+  const treasuryRecipient = decodeProposalActions(targets, values, calldatas, chainId)
     .find((a) => a.recipient)?.recipient;
   const { data: recipientSanctioned } = useCheckSanction(treasuryRecipient);
   const isSanctioned =

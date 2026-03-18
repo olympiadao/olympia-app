@@ -8,8 +8,8 @@ import {
   useMembers,
 } from "@/lib/hooks/use-member-nft";
 import { useAccount } from "wagmi";
-import { contracts } from "@/lib/contracts/addresses";
-import { explorerUrl, truncateAddress } from "@/lib/utils/format";
+import { useChainContracts, useExplorerUrl } from "@/lib/hooks/use-chain";
+import { truncateAddress } from "@/lib/utils/format";
 import { Users, Shield, ExternalLink, Info } from "lucide-react";
 
 export default function MembersPage() {
@@ -17,6 +17,8 @@ export default function MembersPage() {
   const { address } = useAccount();
   const { isMember, isLoading } = useIsMember();
   const { members, isLoading: membersLoading } = useMembers();
+  const contracts = useChainContracts();
+  const explorerUrl = useExplorerUrl();
 
   return (
     <div className="space-y-6">
@@ -178,12 +180,12 @@ export default function MembersPage() {
           <CardTitle>NFT Contract</CardTitle>
         </CardHeader>
         <a
-          href={explorerUrl("address", contracts[63].memberNFT)}
+          href={explorerUrl("address", contracts.memberNFT)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 font-mono text-sm text-brand-green hover:underline"
         >
-          {truncateAddress(contracts[63].memberNFT, 8)}
+          {truncateAddress(contracts.memberNFT, 8)}
           <ExternalLink className="h-3 w-3" />
         </a>
       </Card>

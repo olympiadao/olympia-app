@@ -34,19 +34,26 @@ pnpm test         # Run tests
 - Font: Inter (UI) + JetBrains Mono (code/addresses)
 - Dark-first design, Olympia palette only
 
-## Key Contracts (Mordor Testnet, Chain 63)
+## Key Contracts (Demo v0.2 — Deterministic CREATE2, identical on Chain 61 + 63)
 
 | Contract | Address |
 |----------|---------|
-| OlympiaGovernor | `0xEdbD61F1cE825CF939beBB422F8C914a69826dDA` |
-| OlympiaExecutor | `0x94d4f74dDdE715Ed195B597A3434713690B14e97` |
-| TimelockController | `0x1E0fADee5540a77012f1944fcce58677fC087f6e` |
-| ECFPRegistry | `0xcB532fe70299D53Cc81B5F6365f56A108784d05d` |
-| SanctionsOracle | `0xEeeb33c8b7C936bD8e72A859a3e1F9cc8A26f3B4` |
-| OlympiaMemberNFT | `0x720676EBfe45DECfC43c8E9870C64413a2480EE0` |
-| OlympiaTreasury | `0xd6165F3aF4281037bce810621F62B43077Fb0e37` |
+| OlympiaGovernor | `0xb85dbc899472756470ef4033b9637ff8fa2fd23d` |
+| OlympiaExecutor | `0x64624f74f77639cba268a6c8bedc2778b707ef9a` |
+| TimelockController | `0xa5839b3e9445f7ee7affdbc796dc0601f9b976c2` |
+| ECFPRegistry | `0xfb4de5674a6b9a301d16876795a74f3bdacfa722` |
+| SanctionsOracle | `0xff2b8d7937d908d81c72d20ac99302ee6acc2709` |
+| OlympiaMemberNFT | `0x73e78d3a3470396325b975fcafa8105a89a9e672` |
+| OlympiaTreasury | `0x035b2e3c189B772e52F4C3DA6c45c84A3bB871bf` |
 
 Addresses defined in `src/lib/contracts/addresses.ts`. ABIs in `src/lib/contracts/abis/`.
+
+## Supported Chains
+
+- Mordor Testnet (chain 63) — default, RPC: `https://rpc.mordor.etccooperative.org`
+- ETC Mainnet (chain 61) — RPC: `https://etc.rivet.link`
+
+Chain config in `src/lib/utils/chains.ts`. Hooks in `src/lib/hooks/use-chain.ts`.
 
 ## Related ECIPs
 

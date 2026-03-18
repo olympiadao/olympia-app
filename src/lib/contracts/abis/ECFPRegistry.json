@@ -6,6 +6,11 @@
         "name": "admin",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "_minReviewPeriod",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "nonpayable"
@@ -241,6 +246,19 @@
   },
   {
     "type": "function",
+    "name": "minReviewPeriod",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "rejectProposal",
     "inputs": [
       {
@@ -342,6 +360,97 @@
     "stateMutability": "view"
   },
   {
+    "type": "function",
+    "name": "updateDraft",
+    "inputs": [
+      {
+        "name": "hashId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "recipient",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "metadataCID",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "newHashId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawDraft",
+    "inputs": [
+      {
+        "name": "hashId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "DraftUpdated",
+    "inputs": [
+      {
+        "name": "ecfpId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "oldHashId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "newHashId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "DraftWithdrawn",
+    "inputs": [
+      {
+        "name": "ecfpId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "hashId",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
     "type": "event",
     "name": "ProposalActivated",
     "inputs": [
@@ -358,6 +467,12 @@
     "type": "event",
     "name": "ProposalExecuted",
     "inputs": [
+      {
+        "name": "ecfpId",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
       {
         "name": "hashId",
         "type": "bytes32",
@@ -570,6 +685,16 @@
   },
   {
     "type": "error",
+    "name": "EmptyEcfpId",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "EmptyMetadata",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "InvalidStatusTransition",
     "inputs": [
       {
@@ -586,6 +711,11 @@
   },
   {
     "type": "error",
+    "name": "NotSubmitter",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "ProposalNotFound",
     "inputs": [
       {
@@ -594,5 +724,20 @@
         "internalType": "bytes32"
       }
     ]
+  },
+  {
+    "type": "error",
+    "name": "ReviewPeriodActive",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroAmount",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroRecipient",
+    "inputs": []
   }
 ]

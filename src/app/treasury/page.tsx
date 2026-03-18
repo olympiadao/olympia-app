@@ -2,12 +2,14 @@
 
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTreasuryBalance } from "@/lib/hooks/use-treasury";
-import { formatEtc, explorerUrl } from "@/lib/utils/format";
-import { contracts } from "@/lib/contracts/addresses";
+import { formatEtc } from "@/lib/utils/format";
+import { useChainContracts, useExplorerUrl } from "@/lib/hooks/use-chain";
 import { Landmark, ExternalLink, Info } from "lucide-react";
 
 export default function TreasuryPage() {
   const { data: balance, isLoading } = useTreasuryBalance();
+  const contracts = useChainContracts();
+  const explorerUrl = useExplorerUrl();
 
   return (
     <div className="space-y-6">
@@ -39,15 +41,18 @@ export default function TreasuryPage() {
         <div className="space-y-3">
           <AddressRow
             label="Treasury"
-            address={contracts[63].treasury}
+            address={contracts.treasury}
+            explorerUrl={explorerUrl}
           />
           <AddressRow
             label="Executor"
-            address={contracts[63].executor}
+            address={contracts.executor}
+            explorerUrl={explorerUrl}
           />
           <AddressRow
             label="Timelock"
-            address={contracts[63].timelock}
+            address={contracts.timelock}
+            explorerUrl={explorerUrl}
           />
         </div>
       </Card>
@@ -99,9 +104,11 @@ export default function TreasuryPage() {
 function AddressRow({
   label,
   address,
+  explorerUrl,
 }: {
   label: string;
   address: string;
+  explorerUrl: (type: "tx" | "address" | "block", value: string) => string;
 }) {
   return (
     <div className="flex items-center justify-between rounded-lg border border-border-subtle bg-bg-elevated px-3 py-2">

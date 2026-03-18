@@ -4,11 +4,14 @@ import { useReadContract, useAccount, usePublicClient } from "wagmi";
 import { useEffect, useState } from "react";
 import { parseAbiItem } from "viem";
 import { abis } from "@/lib/contracts/config";
-import { contracts } from "@/lib/contracts/addresses";
+import { getContracts } from "@/lib/contracts/addresses";
+import { useActiveChainId } from "./use-chain";
 
 export function useMemberBalance(address?: `0x${string}`) {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   return useReadContract({
-    address: contracts[63].memberNFT,
+    address: c.memberNFT,
     abi: abis.memberNFT,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
@@ -26,8 +29,10 @@ export function useIsMember() {
 }
 
 export function useTotalMembers() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   return useReadContract({
-    address: contracts[63].memberNFT,
+    address: c.memberNFT,
     abi: abis.memberNFT,
     functionName: "totalSupply",
     query: { refetchInterval: 60_000 },
@@ -46,6 +51,8 @@ const transferEvent = parseAbiItem(
 
 export function useMembers() {
   const client = usePublicClient();
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const [members, setMembers] = useState<Member[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,7 +65,7 @@ export function useMembers() {
 
         // Fetch mint events (from = zero address)
         const mintLogs = await client!.getLogs({
-          address: contracts[63].memberNFT,
+          address: c.memberNFT,
           event: transferEvent,
           args: {
             from: "0x0000000000000000000000000000000000000000",
@@ -69,7 +76,7 @@ export function useMembers() {
 
         // Fetch burn events (to = zero address)
         const burnLogs = await client!.getLogs({
-          address: contracts[63].memberNFT,
+          address: c.memberNFT,
           event: transferEvent,
           args: {
             to: "0x0000000000000000000000000000000000000000",
@@ -101,7 +108,7 @@ export function useMembers() {
     fetchMembers();
     const interval = setInterval(fetchMembers, 60_000);
     return () => clearInterval(interval);
-  }, [client]);
+  }, [client, c.memberNFT]);
 
   return { members, isLoading };
 }

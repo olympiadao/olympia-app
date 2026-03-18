@@ -1,5 +1,5 @@
 import { http, createConfig } from "wagmi";
-import { mordor } from "@/lib/utils/mordor";
+import { mordor, classic } from "@/lib/utils/chains";
 
 import GovernorABI from "./abis/OlympiaGovernor.json";
 import ExecutorABI from "./abis/OlympiaExecutor.json";
@@ -9,9 +9,10 @@ import MemberNFTABI from "./abis/OlympiaMemberNFT.json";
 import TimelockABI from "./abis/TimelockController.json";
 
 export const wagmiConfig = createConfig({
-  chains: [mordor],
+  chains: [mordor, classic],
   transports: {
-    [mordor.id]: http(),
+    [mordor.id]: http("https://rpc.mordor.etccooperative.org"),
+    [classic.id]: http("https://etc.rivet.link"),
   },
   ssr: true,
 });

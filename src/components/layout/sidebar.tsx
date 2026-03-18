@@ -12,6 +12,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
+import { useChainMeta } from "@/lib/hooks/use-chain";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -23,6 +24,7 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { isTestnet } = useChainMeta();
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-border-default bg-bg-surface md:flex">
@@ -71,7 +73,7 @@ export function Sidebar() {
           Demo Config
         </Link>
         <p className="mt-1 px-3 text-xs text-text-subtle">
-          Demo v0.1 · Mordor Testnet
+          Demo v0.2 · {isTestnet ? "Mordor Testnet" : "ETC Mainnet"}
         </p>
         <div className="mt-2 flex items-center gap-3 px-3">
           <a

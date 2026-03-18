@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { contracts } from "@/lib/contracts/addresses";
-import { explorerUrl, truncateAddress } from "@/lib/utils/format";
+import { useChainContracts, useExplorerUrl, useChainMeta } from "@/lib/hooks/use-chain";
+import { truncateAddress } from "@/lib/utils/format";
 import { useBlockStats } from "@/lib/hooks/use-block-stats";
 import {
   Settings2,
@@ -114,7 +114,7 @@ const checklistSections: ChecklistSection[] = [
       { id: "balance", label: "Treasury has balance from mining" },
       {
         id: "rpc",
-        label: "App RPC pointing to local node (127.0.0.1:8545)",
+        label: "App RPC configured (Mordor: etccooperative, ETC: rivet.link)",
       },
     ],
   },
@@ -232,6 +232,9 @@ export default function ConfigPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const { data: blockStats } = useBlockStats();
+  const contracts = useChainContracts();
+  const explorerUrl = useExplorerUrl();
+  const { chainId, isTestnet, symbol } = useChainMeta();
 
   function copyAddress(address: string) {
     navigator.clipboard.writeText(address);
@@ -266,7 +269,7 @@ export default function ConfigPage() {
         </h1>
         <p className="mt-1 text-sm text-text-muted">
           Governance parameters, contract addresses, and E2E testing checklist
-          for the Olympia Demo v0.1 on Mordor testnet.
+          for the Olympia Demo v0.2 on {isTestnet ? "Mordor testnet" : "ETC mainnet"}.
         </p>
       </div>
 
@@ -316,7 +319,7 @@ export default function ConfigPage() {
               </p>
               <div className="space-y-2">
                 {group.items.map((item) => {
-                  const addr = contracts[63][item.key];
+                  const addr = contracts[item.key];
                   return (
                     <div
                       key={item.key}
@@ -365,16 +368,16 @@ export default function ConfigPage() {
           </CardTitle>
         </CardHeader>
         <div className="space-y-2">
-          <InfoRow label="Chain ID" value="63 (Mordor Testnet)" />
-          <InfoRow label="Native Currency" value="METC" />
+          <InfoRow label="Chain ID" value={`${chainId} (${isTestnet ? "Mordor Testnet" : "ETC Mainnet"})`} />
+          <InfoRow label="Native Currency" value={symbol} />
           <InfoRow
             label="Block Explorer"
-            value="etc-mordor.blockscout.com"
-            href="https://etc-mordor.blockscout.com"
+            value={isTestnet ? "etc-mordor.blockscout.com" : "etc.blockscout.com"}
+            href={isTestnet ? "https://etc-mordor.blockscout.com" : "https://etc.blockscout.com"}
           />
           <InfoRow
             label="Public RPC"
-            value="rpc.mordor.etccooperative.org"
+            value={isTestnet ? "rpc.mordor.etccooperative.org" : "etc.rivet.link"}
             mono
           />
           <InfoRow
