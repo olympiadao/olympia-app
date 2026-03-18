@@ -64,6 +64,10 @@ export const metadata: Metadata = {
     description: "On-chain governance for Ethereum Classic",
     images: ["https://core.olympiadao.org/og-image.png"],
   },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
   robots: { index: true, follow: true },
 };
 
