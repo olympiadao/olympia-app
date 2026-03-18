@@ -1,8 +1,54 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
-  /* Brand Green */
+  /* Brand Green — light mode uses darker shade for WCAG AA on white */
+  --color-brand-green: #00a87a;
+  --color-brand-green-hover: #009e72;
+  --color-brand-green-active: #008c64;
+  --color-brand-green-muted: #007a53;
+  --color-brand-green-subtle: rgba(0, 168, 122, 0.08);
+  --color-brand-green-glow: rgba(0, 168, 122, 0.3);
+
+  /* Brand Treasury */
+  --color-brand-treasury: #64748b;
+  --color-brand-treasury-hover: #475569;
+  --color-brand-treasury-subtle: rgba(100, 116, 139, 0.08);
+
+  /* Light mode backgrounds — white page, tinted cards/sidebar for contrast */
+  --color-bg-primary: #ffffff;
+  --color-bg-surface: #f5f7f6;
+  --color-bg-elevated: #edf0ee;
+  --color-bg-overlay: rgba(255, 255, 255, 0.90);
+  --color-bg-card: #f5f7f6;
+
+  /* Light mode text */
+  --color-text-primary: #0a0f10;
+  --color-text-secondary: #374151;
+  --color-text-muted: #6b7280;
+  --color-text-subtle: #9ca3af;
+
+  /* Light mode borders */
+  --color-border-default: #dce3de;
+  --color-border-subtle: rgba(0, 0, 0, 0.06);
+  --color-border-strong: rgba(0, 0, 0, 0.16);
+  --color-border-brand: rgba(0, 168, 122, 0.3);
+
+  /* Semantic */
+  --color-semantic-success: #059669;
+  --color-semantic-error: #ef4444;
+  --color-semantic-warning: #f59e0b;
+  --color-semantic-info: #0ea5e9;
+
+  /* Fonts */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
+/* Dark mode overrides — neon green restored, solid card backgrounds */
+.dark {
   --color-brand-green: #00ffae;
   --color-brand-green-hover: #14f1b4;
   --color-brand-green-active: #00cc8a;
@@ -10,39 +56,30 @@
   --color-brand-green-subtle: rgba(0, 255, 174, 0.08);
   --color-brand-green-glow: rgba(0, 255, 174, 0.4);
 
-  /* Brand Treasury (neutral white/slate — institutional) */
   --color-brand-treasury: #e2e8f0;
   --color-brand-treasury-hover: #cbd5e1;
   --color-brand-treasury-subtle: rgba(226, 232, 240, 0.08);
 
-  /* Dark backgrounds */
   --color-bg-primary: #0a0f10;
-  --color-bg-surface: #0f1614;
-  --color-bg-elevated: #162420;
-  --color-bg-overlay: rgba(10, 15, 16, 0.85);
-  --color-bg-card: rgba(0, 0, 0, 0.35);
+  --color-bg-surface: #111b18;
+  --color-bg-elevated: #182622;
+  --color-bg-overlay: rgba(10, 15, 16, 0.90);
+  --color-bg-card: #141e1b;
 
-  /* Text */
   --color-text-primary: #ffffff;
   --color-text-secondary: #c3c5cb;
   --color-text-muted: #9ca3af;
   --color-text-subtle: #6b7280;
 
-  /* Borders */
-  --color-border-default: #1f292b;
-  --color-border-subtle: rgba(255, 255, 255, 0.04);
+  --color-border-default: #1e2d29;
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
   --color-border-strong: rgba(255, 255, 255, 0.16);
   --color-border-brand: rgba(0, 255, 174, 0.3);
 
-  /* Semantic */
   --color-semantic-success: #00ffae;
   --color-semantic-error: #ef4444;
   --color-semantic-warning: #f59e0b;
   --color-semantic-info: #38bdf8;
-
-  /* Fonts */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
 body {

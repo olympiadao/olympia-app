@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -72,8 +73,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-bg-primary text-text-primary antialiased">
+        <ThemeProvider>
         <Providers>
           <div className="flex min-h-screen">
             <Sidebar />
@@ -86,6 +88,7 @@ export default function RootLayout({
           </div>
           <MobileNav />
         </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );
