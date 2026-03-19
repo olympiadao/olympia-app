@@ -139,30 +139,19 @@ export default function NewProposalPage() {
       </div>
 
       <Card>
-        <div className="space-y-3">
-          <div className="flex items-start gap-2">
-            <Landmark className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
-            <div className="space-y-1 text-xs text-text-muted">
-              <p className="font-medium text-text-secondary">Treasury Proposals (ECFP)</p>
-              <p>
-                Fill in the Treasury Action section to submit a funding proposal
-                to the <strong>ECFPRegistry</strong>. Your draft enters a{" "}
-                <strong>5-minute review period</strong>, then a maintainer activates
-                it for a <strong>100-block governance vote</strong> (~22 min on
-                Mordor). Requires 10% quorum.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-start gap-2">
-            <FileText className="mt-0.5 h-4 w-4 shrink-0 text-semantic-info" />
-            <div className="space-y-1 text-xs text-text-muted">
-              <p className="font-medium text-text-secondary">Signaling Proposals</p>
-              <p>
-                Leave the Treasury Action empty to submit directly to the{" "}
-                <strong>Governor</strong>. Records community sentiment on-chain
-                without moving funds.
-              </p>
-            </div>
+        <div className="flex items-start gap-2">
+          <Landmark className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
+          <div className="space-y-1 text-xs text-text-muted">
+            <p className="font-medium text-text-secondary">Funding Proposal (ECFP)</p>
+            <p>
+              Add a <strong>recipient address</strong> and{" "}
+              <strong>ETC amount</strong> below to request treasury funding.
+              Your proposal enters a{" "}
+              <strong>5-minute review period</strong> as a draft, then a
+              maintainer activates it for a{" "}
+              <strong>100-block governance vote</strong> (~22 min on Mordor).
+              Requires 10% quorum.
+            </p>
           </div>
         </div>
       </Card>
@@ -230,6 +219,20 @@ export default function NewProposalPage() {
                 placeholder="Describe the proposal, budget, milestones…"
                 className="w-full rounded-lg border border-border-default bg-bg-elevated px-3 py-2 text-sm text-text-primary placeholder:text-text-subtle focus:border-brand-green focus:outline-none"
               />
+            </div>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-start gap-2">
+            <FileText className="mt-0.5 h-4 w-4 shrink-0 text-semantic-info" />
+            <div className="space-y-1 text-xs text-text-muted">
+              <p className="font-medium text-text-secondary">Signaling Proposal</p>
+              <p>
+                Skip the recipient and amount fields to submit a vote-only
+                proposal. Records community sentiment on-chain without moving
+                funds.
+              </p>
             </div>
           </div>
         </Card>

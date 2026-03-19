@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -88,6 +89,7 @@ export default function RootLayout({
               <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
                 {children}
               </main>
+              <Footer />
             </div>
           </div>
           <MobileNav />

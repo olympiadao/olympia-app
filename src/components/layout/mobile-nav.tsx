@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   ScrollText,
-  FileEdit,
   Users,
   Landmark,
+  BookOpen,
   Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -15,9 +15,9 @@ import { cn } from "@/lib/utils/cn";
 const navItems = [
   { href: "/", label: "Home", icon: LayoutDashboard },
   { href: "/proposals", label: "Proposals", icon: ScrollText },
-  { href: "/proposals/drafts", label: "Drafts", icon: FileEdit },
   { href: "/members", label: "Members", icon: Users },
   { href: "/treasury", label: "Treasury", icon: Landmark },
+  { href: "/how-it-works", label: "How It Works", icon: BookOpen },
   { href: "/admin", label: "Admin", icon: Shield },
 ];
 
@@ -29,10 +29,7 @@ export function MobileNav() {
       {navItems.map((item) => {
         const isActive =
           pathname === item.href ||
-          (item.href !== "/" &&
-            !item.href.includes("/drafts") &&
-            pathname.startsWith(item.href) &&
-            !pathname.startsWith(item.href + "/drafts"));
+          (item.href !== "/" && pathname.startsWith(item.href));
 
         return (
           <Link

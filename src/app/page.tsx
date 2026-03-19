@@ -15,20 +15,22 @@ import {
   formatCountdown,
 } from "@/lib/utils/block-time";
 import Link from "next/link";
-import { ScrollText, Landmark, Users, Info } from "lucide-react";
+import { ScrollText, Landmark, Users, Info, ExternalLink } from "lucide-react";
 import {
   parseProposalDescription,
   proposalCategoryColors,
 } from "@/lib/utils/proposal-categories";
 import { decodeProposalActions } from "@/lib/utils/decode-actions";
 import { useCheckSanction } from "@/lib/hooks/use-admin";
-import { useActiveChainId } from "@/lib/hooks/use-chain";
+import { useActiveChainId, useExplorerUrl, useChainContracts } from "@/lib/hooks/use-chain";
 
 export default function Dashboard() {
   const { proposals, isLoading: proposalsLoading } = useProposals();
   const { data: balance } = useTreasuryBalance();
   const { data: totalMembers } = useTotalMembers();
   const { data: blockStats } = useBlockStats();
+  const explorerUrl = useExplorerUrl();
+  const contracts = useChainContracts();
 
   return (
     <div className="space-y-8">
@@ -60,6 +62,41 @@ export default function Dashboard() {
           }
         />
       </div>
+
+      {/* Treasury Hero */}
+      <Card>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="mb-2 font-mono text-xs font-semibold uppercase tracking-widest text-brand-green">
+              Live Data
+            </p>
+            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
+              Olympia{" "}
+              <span className="text-brand-green">Treasury</span>
+            </h2>
+            <p className="mt-1 text-sm text-text-muted">
+              {balance ? `${formatEtc(balance.value)} METC` : "…"}
+            </p>
+          </div>
+          <a
+            href={explorerUrl("address", contracts.treasury)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-background transition-all duration-200 hover:brightness-110"
+          >
+            Explorer
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+        <div className="mt-4 rounded-lg border border-border-default bg-bg-elevated px-4 py-2.5">
+          <span className="mr-3 text-xs font-medium uppercase tracking-wider text-text-subtle">
+            Vault
+          </span>
+          <code className="font-mono text-sm text-brand-green">
+            {contracts.treasury}
+          </code>
+        </div>
+      </Card>
 
       {/* How Governance Works */}
       <Card>

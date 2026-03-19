@@ -8,6 +8,8 @@ import {
   FileEdit,
   Users,
   Landmark,
+  BookOpen,
+  FileCode,
   Shield,
   Settings2,
   ExternalLink,
@@ -21,6 +23,8 @@ const navItems = [
   { href: "/proposals/drafts", label: "Drafts", icon: FileEdit },
   { href: "/members", label: "Members", icon: Users },
   { href: "/treasury", label: "Treasury", icon: Landmark },
+  { href: "/how-it-works", label: "How It Works", icon: BookOpen },
+  { href: "/contracts", label: "Contracts", icon: FileCode },
   { href: "/admin", label: "Admin", icon: Shield },
 ];
 
