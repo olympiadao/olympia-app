@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { encodeFunctionData, BaseError, ContractFunctionRevertedError } from "viem";
+import { BaseError, ContractFunctionRevertedError, keccak256, toBytes } from "viem";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { abis } from "@/lib/contracts/config";
 import { useChainContracts } from "@/lib/hooks/use-chain";
 import { useCheckSanction } from "@/lib/hooks/use-admin";
-import { Info, ShieldAlert } from "lucide-react";
+import { useSubmitDraft } from "@/lib/hooks/use-ecfp-registry";
+import { ShieldAlert, FileText, Landmark } from "lucide-react";
 import { PROPOSAL_CATEGORIES } from "@/lib/utils/proposal-categories";
 
 function parseContractError(error: Error): string {
@@ -40,24 +42,38 @@ export default function NewProposalPage() {
   const [targetAddress, setTargetAddress] = useState("");
   const [etcAmount, setEtcAmount] = useState("");
 
+  const hasTreasuryAction = !!(targetAddress && etcAmount && parseFloat(etcAmount) > 0);
   const isValidAddress = /^0x[0-9a-fA-F]{40}$/.test(targetAddress);
   const { data: isSanctioned } = useCheckSanction(
     isValidAddress ? (targetAddress as `0x${string}`) : undefined
   );
 
+  // ECFPRegistry path (treasury proposals)
+  const {
+    submit: submitDraft,
+    isPending: isDraftPending,
+    isConfirming: isDraftConfirming,
+    isSuccess: isDraftSuccess,
+    error: draftError,
+  } = useSubmitDraft();
+
+  // Governor path (signaling proposals)
   const {
     writeContract,
-    data: hash,
-    isPending,
-    error: writeError,
+    data: signalingHash,
+    isPending: isSignalingPending,
+    error: signalingWriteError,
   } = useWriteContract();
   const {
-    isLoading: isConfirming,
-    isSuccess,
-    error: receiptError,
-  } = useWaitForTransactionReceipt({ hash });
+    isLoading: isSignalingConfirming,
+    isSuccess: isSignalingSuccess,
+    error: signalingReceiptError,
+  } = useWaitForTransactionReceipt({ hash: signalingHash });
 
-  const error = writeError ?? receiptError;
+  const isPending = isDraftPending || isSignalingPending;
+  const isConfirming = isDraftConfirming || isSignalingConfirming;
+  const isSuccess = isDraftSuccess || isSignalingSuccess;
+  const error = draftError ?? signalingWriteError ?? signalingReceiptError;
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -67,30 +83,15 @@ export default function NewProposalPage() {
       ? `${prefixedTitle}\n${description}`
       : prefixedTitle;
 
-    // If target + amount provided, encode an executeTreasury call
-    if (targetAddress && etcAmount) {
-      const calldata = encodeFunctionData({
-        abi: abis.executor,
-        functionName: "executeTreasury",
-        args: [
-          targetAddress as `0x${string}`,
-          BigInt(Math.floor(parseFloat(etcAmount) * 1e18)),
-        ],
-      });
+    if (hasTreasuryAction) {
+      // Treasury proposals go through ECFPRegistry
+      const ecfpId = keccak256(toBytes(prefixedTitle));
+      const metadataCID = keccak256(toBytes(fullDescription));
+      const amount = BigInt(Math.floor(parseFloat(etcAmount) * 1e18));
 
-      writeContract({
-        address: contracts.governor,
-        abi: abis.governor,
-        functionName: "propose",
-        args: [
-          [contracts.executor],
-          [0n],
-          [calldata],
-          fullDescription,
-        ],
-      });
+      submitDraft(ecfpId, targetAddress as `0x${string}`, amount, metadataCID);
     } else {
-      // Signaling proposal (no-op)
+      // Signaling proposals go directly to Governor
       writeContract({
         address: contracts.governor,
         abi: abis.governor,
@@ -109,11 +110,21 @@ export default function NewProposalPage() {
     return (
       <Card className="py-12 text-center">
         <p className="text-lg font-semibold text-brand-green">
-          Proposal submitted
+          {isDraftSuccess ? "Draft submitted to ECFPRegistry" : "Proposal submitted"}
         </p>
         <p className="mt-2 text-sm text-text-muted">
-          Your proposal has been created on-chain.
+          {isDraftSuccess
+            ? "Your funding proposal is now in Draft status. It must wait the 5-minute review period before an admin can activate it for governance voting."
+            : "Your signaling proposal has been created on-chain."}
         </p>
+        {isDraftSuccess && (
+          <p className="mt-3 text-xs text-text-subtle">
+            Track your draft on the{" "}
+            <Link href="/proposals/drafts" className="text-brand-green hover:underline">
+              Drafts page
+            </Link>
+          </p>
+        )}
       </Card>
     );
   }
@@ -128,24 +139,30 @@ export default function NewProposalPage() {
       </div>
 
       <Card>
-        <div className="flex items-start gap-2">
-          <Info className="mt-0.5 h-4 w-4 shrink-0 text-semantic-info" />
-          <div className="space-y-2 text-xs text-text-muted">
-            <p>
-              Proposals require a title and optional description. To request
-              treasury funds, fill in the Treasury Action section with a
-              recipient address and ETC amount.
-            </p>
-            <p>
-              Your proposal will enter a <strong>1-block voting delay</strong>,
-              then a <strong>100-block voting period</strong> (~22 minutes on
-              Mordor). It needs 10% quorum to pass.
-            </p>
-            <p>
-              <strong>Signaling proposals</strong> (no treasury action) are also
-              supported — they record community sentiment on-chain without
-              moving funds.
-            </p>
+        <div className="space-y-3">
+          <div className="flex items-start gap-2">
+            <Landmark className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
+            <div className="space-y-1 text-xs text-text-muted">
+              <p className="font-medium text-text-secondary">Treasury Proposals (ECFP)</p>
+              <p>
+                Fill in the Treasury Action section to submit a funding proposal
+                to the <strong>ECFPRegistry</strong>. Your draft enters a{" "}
+                <strong>5-minute review period</strong>, then an admin activates
+                it for a <strong>100-block governance vote</strong> (~22 min on
+                Mordor). Requires 10% quorum.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-start gap-2">
+            <FileText className="mt-0.5 h-4 w-4 shrink-0 text-semantic-info" />
+            <div className="space-y-1 text-xs text-text-muted">
+              <p className="font-medium text-text-secondary">Signaling Proposals</p>
+              <p>
+                Leave the Treasury Action empty to submit directly to the{" "}
+                <strong>Governor</strong>. Records community sentiment on-chain
+                without moving funds.
+              </p>
+            </div>
           </div>
         </div>
       </Card>

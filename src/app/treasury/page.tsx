@@ -62,11 +62,12 @@ export default function TreasuryPage() {
           <CardTitle>Execution Path</CardTitle>
         </CardHeader>
         <div className="space-y-2 text-sm text-text-secondary">
-          <p>1. Proposal passes governance vote (100 blocks, ~22 min)</p>
-          <p>2. Proposal is queued in TimelockController (1 hour on Mordor)</p>
-          <p>3. After timelock, proposal is executed</p>
-          <p>4. OlympiaExecutor checks sanctions (Layer 3)</p>
-          <p>5. Treasury releases funds to recipient</p>
+          <p>1. ECFP draft submitted to ECFPRegistry (5 min review period)</p>
+          <p>2. Admin activates draft → Governor proposal created</p>
+          <p>3. Governance vote (100 blocks, ~22 min on Mordor)</p>
+          <p>4. Proposal queued in TimelockController (1 hour)</p>
+          <p>5. OlympiaExecutor checks sanctions (Layer 3), calls Treasury.withdraw()</p>
+          <p>6. Treasury releases funds to recipient</p>
         </div>
       </Card>
 
@@ -74,26 +75,39 @@ export default function TreasuryPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info className="h-4 w-4 text-semantic-info" />
-            How Treasury Withdrawals Work
+            Treasury Architecture (v0.2)
           </CardTitle>
         </CardHeader>
         <div className="space-y-3 text-sm text-text-secondary">
           <p>
-            Only the <strong className="text-text-primary">OlympiaExecutor</strong> can
-            withdraw from the treasury. Direct transfers to the treasury
-            contract are accepted but cannot be withdrawn except through
-            governance.
+            The treasury is a <strong className="text-text-primary">pure Solidity contract</strong> with
+            an <strong className="text-text-primary">immutable executor</strong> address
+            set at deployment. There are no admin functions, no roles, and no
+            upgrade path — the executor address can never be changed.
+          </p>
+          <p>
+            Only two functions exist:{" "}
+            <code className="rounded bg-bg-elevated px-1.5 py-0.5 font-mono text-xs text-text-primary">
+              withdraw(to, amount)
+            </code>{" "}
+            (callable only by the immutable executor) and{" "}
+            <code className="rounded bg-bg-elevated px-1.5 py-0.5 font-mono text-xs text-text-primary">
+              receive()
+            </code>{" "}
+            (accepts donations from any address).
           </p>
           <p>
             The Executor is called by the TimelockController after a proposal
-            passes the full governance pipeline (propose → vote → queue →
-            execute).
+            passes the full governance pipeline. The execution path is:
+          </p>
+          <p className="font-mono text-xs text-text-muted">
+            Governor → Timelock → Executor → Treasury.withdraw()
           </p>
           <p>
             <strong className="text-text-primary">Layer 3 sanctions check:</strong> The
             Executor verifies the recipient is not on the sanctions list before
-            releasing funds. If the recipient is sanctioned, the withdrawal
-            reverts and funds remain safe in the treasury.
+            calling Treasury.withdraw(). If sanctioned, the withdrawal reverts
+            and funds remain safe.
           </p>
         </div>
       </Card>

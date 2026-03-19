@@ -58,6 +58,11 @@ function getVotingParams(avgBlockTimeMs?: number) {
       value: "0",
       description: "Any NFT holder can create a proposal",
     },
+    {
+      label: "Min Review Period",
+      value: "300s (5 min)",
+      description: "Minimum wait before ECFPRegistry draft activation",
+    },
   ];
 }
 
@@ -438,7 +443,7 @@ export default function ConfigPage() {
                         }`}
                       >
                         {isChecked && (
-                          <Check className="h-3 w-3 text-bg-primary" />
+                          <Check className="h-3 w-3 text-background" />
                         )}
                       </div>
                       {item.label}
