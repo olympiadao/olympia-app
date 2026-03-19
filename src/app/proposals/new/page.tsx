@@ -114,7 +114,7 @@ export default function NewProposalPage() {
         </p>
         <p className="mt-2 text-sm text-text-muted">
           {isDraftSuccess
-            ? "Your funding proposal is now in Draft status. It must wait the 5-minute review period before an admin can activate it for governance voting."
+            ? "Your funding proposal is now in Draft status. It must wait the 5-minute review period before a maintainer can activate it for governance voting."
             : "Your signaling proposal has been created on-chain."}
         </p>
         {isDraftSuccess && (
@@ -147,7 +147,7 @@ export default function NewProposalPage() {
               <p>
                 Fill in the Treasury Action section to submit a funding proposal
                 to the <strong>ECFPRegistry</strong>. Your draft enters a{" "}
-                <strong>5-minute review period</strong>, then an admin activates
+                <strong>5-minute review period</strong>, then a maintainer activates
                 it for a <strong>100-block governance vote</strong> (~22 min on
                 Mordor). Requires 10% quorum.
               </p>

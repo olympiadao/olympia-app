@@ -121,7 +121,7 @@ export default function DraftsPage() {
                 {minReview ? `${Number(minReview)}s (${Math.round(Number(minReview) / 60)} min)` : "…"}{" "}
                 review period
               </strong>
-              , an admin activates the draft for a governance vote. You can edit
+              , a maintainer activates the draft for a governance vote. You can edit
               or withdraw your own drafts while they remain in Draft status.
             </p>
           </div>

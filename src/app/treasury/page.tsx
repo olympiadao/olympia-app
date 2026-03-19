@@ -63,7 +63,7 @@ export default function TreasuryPage() {
         </CardHeader>
         <div className="space-y-2 text-sm text-text-secondary">
           <p>1. ECFP draft submitted to ECFPRegistry (5 min review period)</p>
-          <p>2. Admin activates draft → Governor proposal created</p>
+          <p>2. Maintainer activates draft → Governor proposal created</p>
           <p>3. Governance vote (100 blocks, ~22 min on Mordor)</p>
           <p>4. Proposal queued in TimelockController (1 hour)</p>
           <p>5. OlympiaExecutor checks sanctions (Layer 3), calls Treasury.withdraw()</p>

@@ -164,7 +164,7 @@ export default function MembersPage() {
             governance voting. Each NFT represents exactly one vote.
           </p>
           <p>
-            NFTs are minted by the DAO admin and automatically delegate voting
+            NFTs are minted by a DAO maintainer and automatically delegate voting
             power to the holder. No manual delegation is needed.
           </p>
           <p>
