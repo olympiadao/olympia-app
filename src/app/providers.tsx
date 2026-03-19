@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useSyncExternalStore } from "react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RainbowKitProvider, darkTheme, lightTheme } from "@rainbow-me/rainbowkit";
@@ -25,9 +25,17 @@ const olympiaLight = lightTheme({
   fontStack: "system",
 });
 
+const subscribe = () => () => {};
+function useMounted() {
+  return useSyncExternalStore(subscribe, () => true, () => false);
+}
+
 function RainbowKitWrapper({ children }: { children: ReactNode }) {
+  const mounted = useMounted();
   const { resolvedTheme } = useTheme();
-  const rkTheme = resolvedTheme === "dark" ? olympiaDark : olympiaLight;
+
+  // Default to dark during SSR to avoid hydration mismatch
+  const rkTheme = mounted && resolvedTheme === "light" ? olympiaLight : olympiaDark;
 
   return (
     <RainbowKitProvider theme={rkTheme}>
