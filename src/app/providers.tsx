@@ -19,7 +19,7 @@ const olympiaDark = darkTheme({
 });
 
 const olympiaLight = lightTheme({
-  accentColor: "#00a87a",
+  accentColor: "#00a872",
   accentColorForeground: "#ffffff",
   borderRadius: "medium",
   fontStack: "system",

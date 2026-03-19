@@ -3,97 +3,247 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme inline {
-  /* Brand Green — light mode uses darker shade for WCAG AA on white */
-  --color-brand-green: #00a87a;
-  --color-brand-green-hover: #009e72;
-  --color-brand-green-active: #008c64;
-  --color-brand-green-muted: #007a53;
-  --color-brand-green-subtle: rgba(0, 168, 122, 0.08);
-  --color-brand-green-glow: rgba(0, 168, 122, 0.3);
+/* ==========================================
+   Olympia Design Tokens — Aligned with Ecosystem
+   ========================================== */
 
-  /* Brand Treasury */
-  --color-brand-treasury: #64748b;
-  --color-brand-treasury-hover: #475569;
-  --color-brand-treasury-subtle: rgba(100, 116, 139, 0.08);
+/* --- Light mode (default) --- */
+:root {
+  /* Brand — darker shade for WCAG AA on white */
+  --brand-green: #00a872;
+  --brand-green-hover: #009e6a;
+  --brand-green-active: #008c5e;
+  --brand-green-muted: #007a53;
+  --brand-green-subtle: rgba(0, 168, 114, 0.08);
+  --brand-green-glow: rgba(0, 168, 114, 0.3);
+  --brand-amber: #F59E0B;
 
-  /* Light mode backgrounds — white page, tinted cards/sidebar for contrast */
-  --color-bg-primary: #ffffff;
-  --color-bg-surface: #f5f7f6;
-  --color-bg-elevated: #edf0ee;
-  --color-bg-overlay: rgba(255, 255, 255, 0.90);
-  --color-bg-card: #f5f7f6;
+  /* Brand Treasury (app-specific) */
+  --brand-treasury: #64748b;
+  --brand-treasury-hover: #475569;
+  --brand-treasury-subtle: rgba(100, 116, 139, 0.08);
 
-  /* Light mode text */
-  --color-text-primary: #0a0f10;
-  --color-text-secondary: #374151;
-  --color-text-muted: #6b7280;
-  --color-text-subtle: #9ca3af;
+  /* Backgrounds */
+  --background: #f8faf9;
+  --foreground: #0a0f10;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f1f5f3;
+  --bg-deep: #edf2f0;
+  --bg-overlay: rgba(248, 250, 249, 0.92);
+  --bg-card: rgba(255, 255, 255, 0.6);
 
-  /* Light mode borders */
-  --color-border-default: #dce3de;
-  --color-border-subtle: rgba(0, 0, 0, 0.06);
-  --color-border-strong: rgba(0, 0, 0, 0.16);
-  --color-border-brand: rgba(0, 168, 122, 0.3);
+  /* Text */
+  --text-primary: #0a0f10;
+  --text-secondary: #374151;
+  --text-muted: #6b7280;
+  --text-subtle: #9ca3af;
+
+  /* Borders */
+  --border-default: #e2e8f0;
+  --border-subtle: rgba(0, 0, 0, 0.04);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --border-brand: rgba(0, 168, 114, 0.3);
+  --border-glow: rgba(0, 168, 114, 0.15);
+  --divider: rgba(0, 0, 0, 0.06);
 
   /* Semantic */
-  --color-semantic-success: #059669;
-  --color-semantic-error: #ef4444;
-  --color-semantic-warning: #f59e0b;
-  --color-semantic-info: #0ea5e9;
+  --color-success: #059669;
+  --color-error: #ef4444;
+  --color-warning: #F59E0B;
+  --color-info: #0ea5e9;
 
-  /* Fonts */
+  /* Card shadows */
+  --card-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+  --card-hover-shadow: 0 14px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* --- Dark mode --- */
+.dark {
+  --brand-green: #00ffae;
+  --brand-green-hover: #14f1b4;
+  --brand-green-active: #00cc8a;
+  --brand-green-muted: #007a53;
+  --brand-green-subtle: rgba(0, 255, 174, 0.08);
+  --brand-green-glow: rgba(0, 255, 174, 0.4);
+
+  --brand-treasury: #e2e8f0;
+  --brand-treasury-hover: #cbd5e1;
+  --brand-treasury-subtle: rgba(226, 232, 240, 0.08);
+
+  --background: #0a0f10;
+  --foreground: #ffffff;
+  --bg-surface: #111111;
+  --bg-elevated: #181818;
+  --bg-deep: #080b0c;
+  --bg-overlay: rgba(10, 15, 16, 0.92);
+  --bg-card: rgba(0, 0, 0, 0.35);
+
+  --text-primary: #ffffff;
+  --text-secondary: #c3c5cb;
+  --text-muted: #9ca3af;
+  --text-subtle: #6b7280;
+
+  --border-default: #1a1a1a;
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-brand: rgba(0, 255, 174, 0.3);
+  --border-glow: rgba(0, 255, 174, 0.15);
+  --divider: rgba(255, 255, 255, 0.06);
+
+  --color-success: #00ffae;
+  --color-error: #ef4444;
+  --color-warning: #F59E0B;
+  --color-info: #38bdf8;
+
+  --card-shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+  --card-hover-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+}
+
+@theme inline {
+  /* Ecosystem tokens (match olympiadao-org exactly) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand-green: var(--brand-green);
+  --color-brand-green-hover: var(--brand-green-hover);
+  --color-brand-green-subtle: var(--brand-green-subtle);
+  --color-brand-amber: var(--brand-amber);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-card: var(--bg-card);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-border-default: var(--border-default);
+  --color-border-brand: var(--border-brand);
+
+  /* App-specific tokens (governance UI extensions) */
+  --color-brand-green-active: var(--brand-green-active);
+  --color-brand-green-muted: var(--brand-green-muted);
+  --color-brand-green-glow: var(--brand-green-glow);
+  --color-brand-treasury: var(--brand-treasury);
+  --color-brand-treasury-hover: var(--brand-treasury-hover);
+  --color-brand-treasury-subtle: var(--brand-treasury-subtle);
+  --color-border-subtle: var(--border-subtle);
+  --color-border-strong: var(--border-strong);
+  --color-semantic-success: var(--color-success);
+  --color-semantic-error: var(--color-error);
+  --color-semantic-warning: var(--color-warning);
+  --color-semantic-info: var(--color-info);
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 }
 
-/* Dark mode overrides — neon green restored, solid card backgrounds */
-.dark {
-  --color-brand-green: #00ffae;
-  --color-brand-green-hover: #14f1b4;
-  --color-brand-green-active: #00cc8a;
-  --color-brand-green-muted: #007a53;
-  --color-brand-green-subtle: rgba(0, 255, 174, 0.08);
-  --color-brand-green-glow: rgba(0, 255, 174, 0.4);
-
-  --color-brand-treasury: #e2e8f0;
-  --color-brand-treasury-hover: #cbd5e1;
-  --color-brand-treasury-subtle: rgba(226, 232, 240, 0.08);
-
-  --color-bg-primary: #0a0f10;
-  --color-bg-surface: #111b18;
-  --color-bg-elevated: #182622;
-  --color-bg-overlay: rgba(10, 15, 16, 0.90);
-  --color-bg-card: #141e1b;
-
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #c3c5cb;
-  --color-text-muted: #9ca3af;
-  --color-text-subtle: #6b7280;
-
-  --color-border-default: #1e2d29;
-  --color-border-subtle: rgba(255, 255, 255, 0.06);
-  --color-border-strong: rgba(255, 255, 255, 0.16);
-  --color-border-brand: rgba(0, 255, 174, 0.3);
-
-  --color-semantic-success: #00ffae;
-  --color-semantic-error: #ef4444;
-  --color-semantic-warning: #f59e0b;
-  --color-semantic-info: #38bdf8;
-}
-
 body {
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
-  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, sans-serif;
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-brand-green);
+  outline: 2px solid var(--brand-green);
   outline-offset: 2px;
 }
 
 ::selection {
-  background: var(--color-brand-green-glow);
+  background: var(--brand-green-subtle);
+  color: var(--text-primary);
+}
+.dark ::selection {
+  background: rgba(0, 255, 174, 0.25);
   color: white;
+}
+
+/* ==========================================
+   Visual System — Backgrounds & Effects
+   ========================================== */
+
+.hero-gradient {
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -30%, rgba(0, 168, 114, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 40% at 20% 20%, rgba(0, 168, 114, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 80% 40%, rgba(0, 80, 60, 0.03) 0%, transparent 50%),
+    linear-gradient(180deg, var(--background) 0%, var(--bg-elevated) 40%, var(--background) 100%);
+}
+
+.dark .hero-gradient {
+  background:
+    radial-gradient(ellipse 120% 60% at 50% -30%, rgba(0, 255, 174, 0.09) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 40% at 20% 20%, rgba(0, 255, 174, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 80% 40%, rgba(0, 80, 60, 0.06) 0%, transparent 50%),
+    linear-gradient(180deg, #0a0f10 0%, #0d1214 40%, #0a1210 70%, #0a0f10 100%);
+}
+
+.noise-overlay {
+  position: relative;
+  overflow: hidden;
+}
+
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+
+/* ==========================================
+   Section Backgrounds
+   ========================================== */
+
+.section-alt {
+  background: var(--bg-surface);
+}
+
+.section-gradient {
+  background:
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(0, 168, 114, 0.03) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-elevated) 50%, var(--bg-surface) 100%);
+}
+.dark .section-gradient {
+  background:
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(0, 255, 174, 0.03) 0%, transparent 60%),
+    linear-gradient(180deg, var(--bg-surface) 0%, #0c1110 50%, var(--bg-surface) 100%);
+}
+
+/* ==========================================
+   Section Dividers
+   ========================================== */
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--border-brand) 30%, var(--border-brand) 70%, transparent 100%);
+}
+
+.section-divider-strong {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--border-brand) 20%, var(--brand-green) 50%, var(--border-brand) 80%, transparent 100%);
+  box-shadow: 0 0 20px var(--border-glow);
+}
+
+/* ==========================================
+   Animations & Accessibility
+   ========================================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
