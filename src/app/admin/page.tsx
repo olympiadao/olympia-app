@@ -37,7 +37,7 @@ export default function AdminPage() {
         <PageHeader />
         <Card className="py-12 text-center">
           <p className="text-text-muted">
-            Connect your wallet to access admin functions.
+            Connect your wallet to access maintainer functions.
           </p>
         </Card>
       </div>
@@ -54,7 +54,7 @@ export default function AdminPage() {
             Not Authorized
           </p>
           <p className="mt-1 text-sm text-text-muted">
-            Only admin wallets can perform these actions. The deployer wallet
+            Only maintainer wallets can perform these actions. The deployer wallet
             holds DEFAULT_ADMIN_ROLE on all contracts.
           </p>
         </Card>
@@ -72,17 +72,17 @@ export default function AdminPage() {
           <CardTitle>Your Roles</CardTitle>
         </CardHeader>
         <div className="flex flex-wrap gap-2">
-          <RoleBadge label="NFT Admin" active={roles.isNftAdmin} />
+          <RoleBadge label="NFT Maintainer" active={roles.isNftAdmin} />
           <RoleBadge label="Minter" active={roles.isMinter} />
           <RoleBadge
-            label="Sanctions Admin"
+            label="Sanctions Maintainer"
             active={roles.isSanctionsAdmin}
           />
           <RoleBadge
             label="Sanctions Manager"
             active={roles.isSanctionsManager}
           />
-          <RoleBadge label="Registry Admin" active={roles.isRegistryAdmin} />
+          <RoleBadge label="Registry Maintainer" active={roles.isRegistryAdmin} />
           <RoleBadge label="Governor" active={roles.isGovernor} />
         </div>
       </Card>
@@ -109,7 +109,7 @@ function PageHeader() {
     <div>
       <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
         <Shield className="h-6 w-6 text-brand-green" />
-        DAO Admin
+        DAO Maintainer
       </h1>
       <p className="mt-1 text-sm text-text-muted">
         Manage membership NFTs, sanctions list, and contract roles

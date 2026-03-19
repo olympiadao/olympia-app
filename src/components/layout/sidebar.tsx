@@ -25,7 +25,7 @@ const navItems = [
   { href: "/treasury", label: "Treasury", icon: Landmark },
   { href: "/how-it-works", label: "How It Works", icon: BookOpen },
   { href: "/contracts", label: "Contracts", icon: FileCode },
-  { href: "/admin", label: "Admin", icon: Shield },
+  { href: "/admin", label: "Maintainer", icon: Shield },
 ];
 
 export function Sidebar() {

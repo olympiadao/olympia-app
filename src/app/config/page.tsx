@@ -114,7 +114,7 @@ const checklistSections: ChecklistSection[] = [
       },
       {
         id: "wallet",
-        label: "Deployer wallet connected (has admin roles + NFT)",
+        label: "Deployer wallet connected (has maintainer roles + NFT)",
       },
       { id: "balance", label: "Treasury has balance from mining" },
       {
@@ -132,7 +132,7 @@ const checklistSections: ChecklistSection[] = [
       },
       {
         id: "mint-2nd",
-        label: "Mint second NFT via Admin page to 0x66a3…0645",
+        label: "Mint second NFT via Maintainer page to 0x66a3…0645",
       },
       { id: "total-2", label: "Verify total members = 2" },
     ],
@@ -201,7 +201,7 @@ const checklistSections: ChecklistSection[] = [
     items: [
       {
         id: "sanction-add",
-        label: "Add an address to sanctions list via Admin page",
+        label: "Add an address to sanctions list via Maintainer page",
       },
       {
         id: "sanction-l1",

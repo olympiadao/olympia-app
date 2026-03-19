@@ -115,12 +115,12 @@ export default function Dashboard() {
             — one NFT equals one vote
           </p>
           <p>
-            <strong className="text-text-primary">2.</strong> Any member can{" "}
+            <strong className="text-text-primary">2.</strong> Anyone can{" "}
             <Link
               href="/proposals/new"
               className="text-brand-green hover:underline"
             >
-              create a proposal
+              submit a proposal
             </Link>{" "}
             (treasury withdrawal or signaling)
           </p>

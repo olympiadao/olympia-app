@@ -38,7 +38,7 @@ const governanceSteps = [
     icon: FileText,
     title: "Propose",
     description:
-      "Any member can submit a governance proposal on-chain. Proposals define the action to execute and the supporting rationale.",
+      "Anyone can submit a governance proposal on-chain. Proposals define the action to execute and the supporting rationale.",
   },
   {
     icon: Vote,
