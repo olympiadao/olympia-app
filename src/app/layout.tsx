@@ -64,6 +64,15 @@ export const metadata: Metadata = {
     images: ["https://core.olympiadao.org/og-image.png"],
   },
   robots: { index: true, follow: true },
+  alternates: { canonical: "https://core.olympiadao.org" },
+  creator: "Ethereum Classic DAO",
+  other: { "color-scheme": "dark" },
+  formatDetection: { telephone: false, email: false },
+  appleWebApp: {
+    capable: true,
+    title: "Olympia Governance",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({
