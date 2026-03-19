@@ -12,9 +12,10 @@ CoreDAO governance UI for Ethereum Classic — browse proposals, vote, manage tr
 - Sanctions 3-layer defense (form validation, active check, executor enforcement)
 - Proposal lifecycle pipeline: Propose → Vote → Queue → Execute → Disclose
 - Member NFT management
-- Treasury balance and contract info
+- Full treasury dashboard — 6 KPI cards (balance, mined income, basefee, donations, withdrawals, tx count), balance history chart (recharts), transaction table via Blockscout API v2
 - Multi-chain: Mordor Testnet (63) + ETC Mainnet (61)
 - Block countdown timers for voting and timelock periods
+- Dark/light theme with RainbowKit wallet integration
 
 ## Tech Stack
 
@@ -25,6 +26,8 @@ CoreDAO governance UI for Ethereum Classic — browse proposals, vote, manage tr
 | Styling | Tailwind CSS 4, Olympia brand tokens |
 | Chain | wagmi 2 + viem 2 (contract interaction) |
 | Wallet | RainbowKit 2 |
+| Charts | recharts 3 |
+| Data | @tanstack/react-query 5 (Blockscout API v2) |
 | Icons | Lucide React |
 | Testing | Vitest 3 |
 | Package Manager | pnpm 10 |
@@ -56,12 +59,17 @@ pnpm test         # Run tests
 
 ## Pages
 
-- `/` — Dashboard (stats, recent proposals, treasury balance)
+- `/` — Dashboard (stats, 6 treasury KPI cards, balance history chart, recent proposals)
 - `/proposals` — Proposals list with category filters
 - `/proposals/new` — Create ECFP proposal
 - `/proposals/[id]` — Proposal detail, voting, lifecycle timeline
+- `/proposals/drafts` — Saved proposal drafts
 - `/members` — NFT holders
-- `/treasury` — Treasury balance + contract info
+- `/treasury` — Full treasury dashboard (KPIs, balance chart, transaction table, architecture)
+- `/how-it-works` — Governance explainer
+- `/contracts` — Deployed contract addresses
+- `/admin` — Maintainer tools (sanctions, NFT minting)
+- `/config` — Demo configuration
 
 ## Branch Strategy
 

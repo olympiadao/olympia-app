@@ -14,7 +14,7 @@ export function Header() {
         <span className="text-lg font-bold text-brand-green md:hidden">Olympia</span>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-border-brand bg-brand-green-subtle px-2.5 py-0.5 text-xs font-medium text-brand-green">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand-green" />
-          Demo v0.2{isTestnet ? " · Mordor" : " · ETC"}
+          Demo v0.2{isTestnet ? " · Mordor Testnet" : " · Ethereum Classic"}
         </span>
       </div>
       <div className="flex items-center gap-3">
