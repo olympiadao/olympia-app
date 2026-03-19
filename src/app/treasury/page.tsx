@@ -1,39 +1,119 @@
 "use client";
 
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTreasuryBalance } from "@/lib/hooks/use-treasury";
-import { formatEtc } from "@/lib/utils/format";
-import { useChainContracts, useExplorerUrl } from "@/lib/hooks/use-chain";
-import { Landmark, ExternalLink, Info } from "lucide-react";
+import { useTreasuryStats } from "@/lib/hooks/use-treasury";
+import { useChainContracts, useExplorerUrl, useChainMeta } from "@/lib/hooks/use-chain";
+import {
+  ExternalLink,
+  Info,
+  Wallet,
+  Pickaxe,
+  Flame,
+  Heart,
+  TrendingDown,
+  Activity,
+} from "lucide-react";
+import { KpiCard, formatAmount } from "@/components/treasury/kpi-card";
+import { BalanceChart } from "@/components/treasury/balance-chart";
+import { TransactionsTable } from "@/components/treasury/transactions-table";
 
 export default function TreasuryPage() {
-  const { data: balance, isLoading } = useTreasuryBalance();
+  const { data: stats, isLoading, error } = useTreasuryStats();
   const contracts = useChainContracts();
   const explorerUrl = useExplorerUrl();
+  const { symbol } = useChainMeta();
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Treasury</h1>
-        <p className="mt-1 text-sm text-text-muted">
-          CoreDAO treasury balance and execution history
-        </p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            Olympia{" "}
+            <span className="text-brand-green">Treasury</span>
+          </h1>
+          <p className="mt-2 text-sm text-text-muted">
+            Live monitoring of the protocol-funded vault for Ethereum Classic.
+          </p>
+        </div>
+        <a
+          href={explorerUrl("address", contracts.treasury)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-background transition-all duration-200 hover:brightness-110"
+        >
+          Explorer
+          <ExternalLink size={14} />
+        </a>
       </div>
 
-      <Card>
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-treasury-subtle">
-            <Landmark className="h-6 w-6 text-brand-treasury" />
-          </div>
-          <div>
-            <p className="text-sm text-text-muted">Treasury Balance</p>
-            <p className="text-3xl font-bold tracking-tight text-brand-treasury">
-              {isLoading ? "…" : balance ? `${formatEtc(balance.value)} METC` : "0 METC"}
-            </p>
-          </div>
-        </div>
-      </Card>
+      {/* Vault address */}
+      <div className="rounded-lg border border-border-default bg-bg-elevated px-5 py-3">
+        <span className="mr-3 text-xs font-medium uppercase tracking-wider text-text-subtle">
+          Vault
+        </span>
+        <code className="font-mono text-sm text-brand-green">
+          {contracts.treasury}
+        </code>
+      </div>
 
+      {/* KPI Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <KpiCard
+          label="Balance"
+          value={stats ? `${formatAmount(stats.balance.formatted)} ${symbol}` : "\u2014"}
+          icon={Wallet}
+          loading={isLoading}
+          error={!!error}
+        />
+        <KpiCard
+          label="Mined Income"
+          value={stats ? `${formatAmount(stats.minedIncome)} ${symbol}` : "\u2014"}
+          subtitle={`Block rewards + tx fees${stats ? ` \u00b7 ${stats.blockCount} blocks` : ""}`}
+          icon={Pickaxe}
+          loading={isLoading}
+          error={!!error}
+        />
+        <KpiCard
+          label="BaseFee"
+          value={stats ? `${formatAmount(stats.baseFeeIncome)} ${symbol}` : "\u2014"}
+          subtitle="Activates with Olympia"
+          icon={Flame}
+          loading={isLoading}
+          error={!!error}
+        />
+        <KpiCard
+          label="Donations"
+          value={stats ? `${formatAmount(stats.totalDonations)} ${symbol}` : "\u2014"}
+          subtitle="Direct transfers from wallets"
+          icon={Heart}
+          loading={isLoading}
+          error={!!error}
+        />
+        <KpiCard
+          label="Withdrawals"
+          value={stats ? `${formatAmount(stats.totalOutflow)} ${symbol}` : "\u2014"}
+          subtitle="Governance-approved ECFPs"
+          icon={TrendingDown}
+          loading={isLoading}
+          error={!!error}
+        />
+        <KpiCard
+          label="Transactions"
+          value={stats ? stats.txCount.toString() : "\u2014"}
+          icon={Activity}
+          loading={isLoading}
+          error={!!error}
+        />
+      </div>
+
+      {/* Balance History Chart */}
+      <BalanceChart />
+
+      {/* Transactions Table */}
+      <TransactionsTable />
+
+      {/* Contract Addresses */}
       <Card>
         <CardHeader>
           <CardTitle>Contract Addresses</CardTitle>
@@ -57,6 +137,7 @@ export default function TreasuryPage() {
         </div>
       </Card>
 
+      {/* Execution Path */}
       <Card>
         <CardHeader>
           <CardTitle>Execution Path</CardTitle>
@@ -71,6 +152,7 @@ export default function TreasuryPage() {
         </div>
       </Card>
 
+      {/* Architecture */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
