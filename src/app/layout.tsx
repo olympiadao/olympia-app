@@ -70,6 +70,15 @@ export const metadata: Metadata = {
     apple: "/apple-icon.png",
   },
   robots: { index: true, follow: true },
+  alternates: { canonical: "https://core.olympiadao.org" },
+  creator: "Ethereum Classic DAO",
+  other: { "color-scheme": "dark" },
+  formatDetection: { telephone: false, email: false },
+  appleWebApp: {
+    capable: true,
+    title: "Olympia Governance",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({
