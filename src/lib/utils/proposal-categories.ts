@@ -1,10 +1,11 @@
 export const PROPOSAL_CATEGORIES = [
-  { value: "SECURITY", label: "Security", description: "CVE patches, vulnerability fixes, security audits" },
-  { value: "INFRASTRUCTURE", label: "Infrastructure", description: "Node software, RPC endpoints, networking" },
+  { value: "COMMUNITY", label: "Community", description: "Documentation, education, outreach" },
   { value: "DEVELOPMENT", label: "Development", description: "Protocol features, client improvements" },
   { value: "GOVERNANCE", label: "Governance", description: "Parameter changes, voting mechanism updates" },
-  { value: "COMMUNITY", label: "Community", description: "Documentation, education, outreach" },
+  { value: "INFRASTRUCTURE", label: "Infrastructure", description: "Node software, RPC endpoints, networking" },
   { value: "OPERATIONS", label: "Operations", description: "Operational costs, maintenance, tooling" },
+  { value: "SECURITY", label: "Security", description: "CVE patches, vulnerability fixes, security audits" },
+  { value: "SIGNALING", label: "Signaling", description: "Community sentiment, non-binding votes, no treasury action" },
 ] as const;
 
 export type ProposalCategory = (typeof PROPOSAL_CATEGORIES)[number]["value"];
@@ -16,6 +17,7 @@ export const proposalCategoryColors: Record<ProposalCategory, string> = {
   GOVERNANCE: "text-teal-400 bg-teal-400/10",
   COMMUNITY: "text-text-muted bg-bg-elevated",
   OPERATIONS: "text-text-muted bg-bg-elevated",
+  SIGNALING: "text-amber-400 bg-amber-400/10",
 };
 
 /**

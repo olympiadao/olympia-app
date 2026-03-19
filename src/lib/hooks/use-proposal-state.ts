@@ -2,15 +2,18 @@
 
 import { useReadContract } from "wagmi";
 import { abis } from "@/lib/contracts/config";
-import { contracts } from "@/lib/contracts/addresses";
+import { getContracts } from "@/lib/contracts/addresses";
+import { useActiveChainId } from "./use-chain";
 import type { ProposalStateValue } from "@/lib/utils/proposal-states";
 
 /** Poll every 60s — catches state transitions within ~4 Mordor blocks */
 const POLL_INTERVAL = 60_000;
 
 export function useProposalState(proposalId: bigint) {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const { data, isLoading, error } = useReadContract({
-    address: contracts[63].governor,
+    address: c.governor,
     abi: abis.governor,
     functionName: "state",
     args: [proposalId],
@@ -25,8 +28,10 @@ export function useProposalState(proposalId: bigint) {
 }
 
 export function useProposalEta(proposalId: bigint) {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const { data, isLoading, error } = useReadContract({
-    address: contracts[63].governor,
+    address: c.governor,
     abi: abis.governor,
     functionName: "proposalEta",
     args: [proposalId],
@@ -41,8 +46,10 @@ export function useProposalEta(proposalId: bigint) {
 }
 
 export function useProposalVotes(proposalId: bigint) {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const { data, isLoading, error } = useReadContract({
-    address: contracts[63].governor,
+    address: c.governor,
     abi: abis.governor,
     functionName: "proposalVotes",
     args: [proposalId],

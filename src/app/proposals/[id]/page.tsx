@@ -20,8 +20,9 @@ import { useMembers } from "@/lib/hooks/use-member-nft";
 import { useVoteCastEvents } from "@/lib/hooks/use-vote-events";
 import type { VoteCastEvent } from "@/lib/hooks/use-vote-events";
 import type { Member } from "@/lib/hooks/use-member-nft";
-import { truncateAddress, formatEtc, explorerUrl } from "@/lib/utils/format";
+import { truncateAddress, formatEtc } from "@/lib/utils/format";
 import { decodeProposalActions } from "@/lib/utils/decode-actions";
+import { useExplorerUrl, useActiveChainId } from "@/lib/hooks/use-chain";
 import { useProposalTxHashes } from "@/lib/hooks/use-proposal-events";
 import { useCheckSanction } from "@/lib/hooks/use-admin";
 import { useCancelIfSanctioned } from "@/lib/hooks/use-proposal-actions";
@@ -77,12 +78,14 @@ export default function ProposalDetailPage({
     isSuccess: cancelSuccess,
     error: cancelError,
   } = useCancelIfSanctioned();
+  const explorerUrl = useExplorerUrl();
+  const chainId = useActiveChainId();
 
   const proposal = proposals.find((p) => p.proposalId.toString() === id);
 
   // Extract treasury recipient for sanctions check (must be before early returns)
   const treasuryRecipient = proposal
-    ? decodeProposalActions(proposal.targets, proposal.values, proposal.calldatas)
+    ? decodeProposalActions(proposal.targets, proposal.values, proposal.calldatas, chainId)
         .find((a) => a.recipient)?.recipient
     : undefined;
   const { data: recipientSanctioned } = useCheckSanction(treasuryRecipient);
@@ -530,7 +533,9 @@ function ProposalActions({
   againstVotes: bigint;
   abstainVotes: bigint;
 }) {
-  const actions = decodeProposalActions(targets, values, calldatas);
+  const explorerUrl = useExplorerUrl();
+  const chainId = useActiveChainId();
+  const actions = decodeProposalActions(targets, values, calldatas, chainId);
 
   const isExecuted = state === ProposalState.Executed;
   const isTerminal =
@@ -708,6 +713,7 @@ function GovernancePipeline({
   sanctioned?: boolean;
   blocked?: boolean;
 }) {
+  const explorerUrl = useExplorerUrl();
   const totalVotes = forVotes + againstVotes + abstainVotes;
 
   // Only members minted at or before the snapshot block were eligible to vote

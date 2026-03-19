@@ -7,6 +7,7 @@ import {
   ScrollText,
   Users,
   Landmark,
+  BookOpen,
   Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
@@ -16,7 +17,8 @@ const navItems = [
   { href: "/proposals", label: "Proposals", icon: ScrollText },
   { href: "/members", label: "Members", icon: Users },
   { href: "/treasury", label: "Treasury", icon: Landmark },
-  { href: "/admin", label: "Admin", icon: Shield },
+  { href: "/how-it-works", label: "How It Works", icon: BookOpen },
+  { href: "/admin", label: "Maintainer", icon: Shield },
 ];
 
 export function MobileNav() {

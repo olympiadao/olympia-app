@@ -6,7 +6,7 @@ type Size = "sm" | "md" | "lg";
 
 const variantStyles: Record<Variant, string> = {
   primary:
-    "bg-brand-green text-bg-primary hover:bg-brand-green-hover active:bg-brand-green-active font-semibold",
+    "bg-brand-green text-background hover:bg-brand-green-hover active:bg-brand-green-active font-semibold",
   secondary:
     "border border-border-default bg-bg-elevated text-text-primary hover:bg-bg-surface",
   ghost:

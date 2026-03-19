@@ -12,6 +12,3 @@ export function formatEtc(wei: bigint, decimals = 4): string {
   });
 }
 
-export function explorerUrl(type: "tx" | "address" | "block", value: string): string {
-  return `https://etc-mordor.blockscout.com/${type}/${value}`;
-}

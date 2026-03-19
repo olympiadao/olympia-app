@@ -3,9 +3,12 @@
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { keccak256, toBytes } from "viem";
 import { abis } from "@/lib/contracts/config";
-import { contracts } from "@/lib/contracts/addresses";
+import { getContracts } from "@/lib/contracts/addresses";
+import { useActiveChainId } from "./use-chain";
 
 export function useQueueProposal() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } =
     useWaitForTransactionReceipt({ hash });
@@ -18,7 +21,7 @@ export function useQueueProposal() {
   ) {
     const descriptionHash = keccak256(toBytes(description));
     writeContract({
-      address: contracts[63].governor,
+      address: c.governor,
       abi: abis.governor,
       functionName: "queue",
       args: [[...targets], [...values], [...calldatas], descriptionHash],
@@ -29,6 +32,8 @@ export function useQueueProposal() {
 }
 
 export function useExecuteProposal() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } =
     useWaitForTransactionReceipt({ hash });
@@ -41,7 +46,7 @@ export function useExecuteProposal() {
   ) {
     const descriptionHash = keccak256(toBytes(description));
     writeContract({
-      address: contracts[63].governor,
+      address: c.governor,
       abi: abis.governor,
       functionName: "execute",
       args: [[...targets], [...values], [...calldatas], descriptionHash],
@@ -52,13 +57,15 @@ export function useExecuteProposal() {
 }
 
 export function useCancelIfSanctioned() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const { writeContract, data: hash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } =
     useWaitForTransactionReceipt({ hash });
 
   function cancelIfSanctioned(proposalId: bigint) {
     writeContract({
-      address: contracts[63].governor,
+      address: c.governor,
       abi: abis.governor,
       functionName: "cancelIfSanctioned",
       args: [proposalId],

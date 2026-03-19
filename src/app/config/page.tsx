@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { contracts } from "@/lib/contracts/addresses";
-import { explorerUrl, truncateAddress } from "@/lib/utils/format";
+import { useChainContracts, useExplorerUrl, useChainMeta } from "@/lib/hooks/use-chain";
+import { truncateAddress } from "@/lib/utils/format";
 import { useBlockStats } from "@/lib/hooks/use-block-stats";
 import {
   Settings2,
@@ -58,6 +58,11 @@ function getVotingParams(avgBlockTimeMs?: number) {
       value: "0",
       description: "Any NFT holder can create a proposal",
     },
+    {
+      label: "Min Review Period",
+      value: "300s (5 min)",
+      description: "Minimum wait before ECFPRegistry draft activation",
+    },
   ];
 }
 
@@ -109,12 +114,12 @@ const checklistSections: ChecklistSection[] = [
       },
       {
         id: "wallet",
-        label: "Deployer wallet connected (has admin roles + NFT)",
+        label: "Deployer wallet connected (has maintainer roles + NFT)",
       },
       { id: "balance", label: "Treasury has balance from mining" },
       {
         id: "rpc",
-        label: "App RPC pointing to local node (127.0.0.1:8545)",
+        label: "App RPC configured (Mordor: etccooperative, ETC: rivet.link)",
       },
     ],
   },
@@ -127,7 +132,7 @@ const checklistSections: ChecklistSection[] = [
       },
       {
         id: "mint-2nd",
-        label: "Mint second NFT via Admin page to 0x66a3…0645",
+        label: "Mint second NFT via Maintainer page to 0x66a3…0645",
       },
       { id: "total-2", label: "Verify total members = 2" },
     ],
@@ -196,7 +201,7 @@ const checklistSections: ChecklistSection[] = [
     items: [
       {
         id: "sanction-add",
-        label: "Add an address to sanctions list via Admin page",
+        label: "Add an address to sanctions list via Maintainer page",
       },
       {
         id: "sanction-l1",
@@ -232,6 +237,9 @@ export default function ConfigPage() {
   const [copied, setCopied] = useState<string | null>(null);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const { data: blockStats } = useBlockStats();
+  const contracts = useChainContracts();
+  const explorerUrl = useExplorerUrl();
+  const { chainId, isTestnet, symbol } = useChainMeta();
 
   function copyAddress(address: string) {
     navigator.clipboard.writeText(address);
@@ -266,7 +274,7 @@ export default function ConfigPage() {
         </h1>
         <p className="mt-1 text-sm text-text-muted">
           Governance parameters, contract addresses, and E2E testing checklist
-          for the Olympia Demo v0.1 on Mordor testnet.
+          for the Olympia Demo v0.2 on {isTestnet ? "Mordor testnet" : "ETC mainnet"}.
         </p>
       </div>
 
@@ -316,7 +324,7 @@ export default function ConfigPage() {
               </p>
               <div className="space-y-2">
                 {group.items.map((item) => {
-                  const addr = contracts[63][item.key];
+                  const addr = contracts[item.key];
                   return (
                     <div
                       key={item.key}
@@ -365,16 +373,16 @@ export default function ConfigPage() {
           </CardTitle>
         </CardHeader>
         <div className="space-y-2">
-          <InfoRow label="Chain ID" value="63 (Mordor Testnet)" />
-          <InfoRow label="Native Currency" value="METC" />
+          <InfoRow label="Chain ID" value={`${chainId} (${isTestnet ? "Mordor Testnet" : "ETC Mainnet"})`} />
+          <InfoRow label="Native Currency" value={symbol} />
           <InfoRow
             label="Block Explorer"
-            value="etc-mordor.blockscout.com"
-            href="https://etc-mordor.blockscout.com"
+            value={isTestnet ? "etc-mordor.blockscout.com" : "etc.blockscout.com"}
+            href={isTestnet ? "https://etc-mordor.blockscout.com" : "https://etc.blockscout.com"}
           />
           <InfoRow
             label="Public RPC"
-            value="rpc.mordor.etccooperative.org"
+            value={isTestnet ? "rpc.mordor.etccooperative.org" : "etc.rivet.link"}
             mono
           />
           <InfoRow
@@ -435,7 +443,7 @@ export default function ConfigPage() {
                         }`}
                       >
                         {isChecked && (
-                          <Check className="h-3 w-3 text-bg-primary" />
+                          <Check className="h-3 w-3 text-background" />
                         )}
                       </div>
                       {item.label}

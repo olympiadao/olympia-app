@@ -2,7 +2,7 @@
 
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProposals } from "@/lib/hooks/use-proposals";
-import { useTreasuryBalance } from "@/lib/hooks/use-treasury";
+import { useTreasuryBalance, useTreasuryStats } from "@/lib/hooks/use-treasury";
 import { useTotalMembers } from "@/lib/hooks/use-member-nft";
 import { formatEtc } from "@/lib/utils/format";
 import { ProposalStatus } from "@/components/proposals/proposal-status";
@@ -15,26 +15,45 @@ import {
   formatCountdown,
 } from "@/lib/utils/block-time";
 import Link from "next/link";
-import { ScrollText, Landmark, Users, Info } from "lucide-react";
+import {
+  ScrollText,
+  Landmark,
+  Users,
+  Info,
+  ExternalLink,
+  Wallet,
+  Pickaxe,
+  Flame,
+  Heart,
+  TrendingDown,
+  Activity,
+} from "lucide-react";
 import {
   parseProposalDescription,
   proposalCategoryColors,
 } from "@/lib/utils/proposal-categories";
 import { decodeProposalActions } from "@/lib/utils/decode-actions";
 import { useCheckSanction } from "@/lib/hooks/use-admin";
+import { useActiveChainId, useExplorerUrl, useChainContracts, useChainMeta } from "@/lib/hooks/use-chain";
+import { KpiCard, formatAmount } from "@/components/treasury/kpi-card";
+import { BalanceChart } from "@/components/treasury/balance-chart";
 
 export default function Dashboard() {
   const { proposals, isLoading: proposalsLoading } = useProposals();
   const { data: balance } = useTreasuryBalance();
+  const { data: stats, isLoading: statsLoading, error: statsError } = useTreasuryStats();
   const { data: totalMembers } = useTotalMembers();
   const { data: blockStats } = useBlockStats();
+  const explorerUrl = useExplorerUrl();
+  const contracts = useChainContracts();
+  const { symbol } = useChainMeta();
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="mt-1 text-sm text-text-muted">
-          Olympia CoreDAO Governance — Demo v0.1
+          Olympia CoreDAO Governance — Demo v0.2
         </p>
       </div>
 
@@ -60,6 +79,95 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* Treasury Section */}
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="mb-2 font-mono text-xs font-semibold uppercase tracking-widest text-brand-green">
+              Live Data
+            </p>
+            <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
+              Olympia{" "}
+              <span className="text-brand-green">Treasury</span>
+            </h2>
+            <p className="mt-1 text-sm text-text-muted">
+              Live monitoring of the protocol-funded vault for Ethereum Classic.
+            </p>
+          </div>
+          <a
+            href={explorerUrl("address", contracts.treasury)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-brand-green px-5 py-2.5 text-sm font-semibold text-background transition-all duration-200 hover:brightness-110"
+          >
+            Explorer
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+
+        <div className="rounded-lg border border-border-default bg-bg-elevated px-4 py-2.5">
+          <span className="mr-3 text-xs font-medium uppercase tracking-wider text-text-subtle">
+            Vault
+          </span>
+          <code className="font-mono text-sm text-brand-green">
+            {contracts.treasury}
+          </code>
+        </div>
+
+        {/* KPI Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <KpiCard
+            label="Balance"
+            value={stats ? `${formatAmount(stats.balance.formatted)} ${symbol}` : "\u2014"}
+            icon={Wallet}
+            loading={statsLoading}
+            error={!!statsError}
+          />
+          <KpiCard
+            label="Mined Income"
+            value={stats ? `${formatAmount(stats.minedIncome)} ${symbol}` : "\u2014"}
+            subtitle={`Block rewards + tx fees${stats ? ` \u00b7 ${stats.blockCount} blocks` : ""}`}
+            icon={Pickaxe}
+            loading={statsLoading}
+            error={!!statsError}
+          />
+          <KpiCard
+            label="BaseFee"
+            value={stats ? `${formatAmount(stats.baseFeeIncome)} ${symbol}` : "\u2014"}
+            subtitle="Activates with Olympia"
+            icon={Flame}
+            loading={statsLoading}
+            error={!!statsError}
+          />
+          <KpiCard
+            label="Donations"
+            value={stats ? `${formatAmount(stats.totalDonations)} ${symbol}` : "\u2014"}
+            subtitle="Direct transfers from wallets"
+            icon={Heart}
+            loading={statsLoading}
+            error={!!statsError}
+          />
+          <KpiCard
+            label="Withdrawals"
+            value={stats ? `${formatAmount(stats.totalOutflow)} ${symbol}` : "\u2014"}
+            subtitle="Governance-approved ECFPs"
+            icon={TrendingDown}
+            loading={statsLoading}
+            error={!!statsError}
+          />
+          <KpiCard
+            label="Transactions"
+            value={stats ? stats.txCount.toString() : "\u2014"}
+            icon={Activity}
+            loading={statsLoading}
+            error={!!statsError}
+          />
+        </div>
+
+        {/* Balance History Chart */}
+        <BalanceChart />
+      </div>
+
       {/* How Governance Works */}
       <Card>
         <CardHeader>
@@ -77,12 +185,12 @@ export default function Dashboard() {
             — one NFT equals one vote
           </p>
           <p>
-            <strong className="text-text-primary">2.</strong> Any member can{" "}
+            <strong className="text-text-primary">2.</strong> Anyone can{" "}
             <Link
               href="/proposals/new"
               className="text-brand-green hover:underline"
             >
-              create a proposal
+              submit a proposal
             </Link>{" "}
             (treasury withdrawal or signaling)
           </p>
@@ -186,9 +294,10 @@ function ProposalRow({
   calldatas: readonly `0x${string}`[];
 }) {
   const { state } = useProposalState(proposalId);
+  const chainId = useActiveChainId();
   const parsed = parseProposalDescription(description);
 
-  const treasuryRecipient = decodeProposalActions(targets, values, calldatas)
+  const treasuryRecipient = decodeProposalActions(targets, values, calldatas, chainId)
     .find((a) => a.recipient)?.recipient;
   const { data: recipientSanctioned } = useCheckSanction(treasuryRecipient);
   const isSanctioned =

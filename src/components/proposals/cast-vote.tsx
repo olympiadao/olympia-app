@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { abis } from "@/lib/contracts/config";
-import { contracts } from "@/lib/contracts/addresses";
+import { useChainContracts } from "@/lib/hooks/use-chain";
 
 const REASON_MAX_LENGTH = 256;
 
@@ -13,6 +13,7 @@ interface CastVoteProps {
 }
 
 export function CastVote({ proposalId }: CastVoteProps) {
+  const contracts = useChainContracts();
   const [reason, setReason] = useState("");
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -23,14 +24,14 @@ export function CastVote({ proposalId }: CastVoteProps) {
     const trimmed = reason.trim();
     if (trimmed) {
       writeContract({
-        address: contracts[63].governor,
+        address: contracts.governor,
         abi: abis.governor,
         functionName: "castVoteWithReason",
         args: [proposalId, support, trimmed],
       });
     } else {
       writeContract({
-        address: contracts[63].governor,
+        address: contracts.governor,
         abi: abis.governor,
         functionName: "castVote",
         args: [proposalId, support],

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -63,6 +65,10 @@ export const metadata: Metadata = {
     description: "On-chain governance for Ethereum Classic",
     images: ["https://core.olympiadao.org/og-image.png"],
   },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
   robots: { index: true, follow: true },
 };
 
@@ -72,8 +78,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
-      <body className="min-h-screen bg-bg-primary text-text-primary antialiased">
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-text-primary antialiased">
+        <ThemeProvider>
         <Providers>
           <div className="flex min-h-screen">
             <Sidebar />
@@ -82,10 +89,12 @@ export default function RootLayout({
               <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
                 {children}
               </main>
+              <Footer />
             </div>
           </div>
           <MobileNav />
         </Providers>
+        </ThemeProvider>
       </body>
     </html>
   );

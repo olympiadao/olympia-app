@@ -3,7 +3,8 @@
 import { usePublicClient } from "wagmi";
 import { useEffect, useState } from "react";
 import { parseAbiItem } from "viem";
-import { contracts } from "@/lib/contracts/addresses";
+import { getContracts } from "@/lib/contracts/addresses";
+import { useActiveChainId } from "./use-chain";
 
 const voteCastEvent = parseAbiItem(
   "event VoteCast(address indexed voter, uint256 proposalId, uint8 support, uint256 weight, string reason)"
@@ -20,6 +21,8 @@ export interface VoteCastEvent {
 
 export function useVoteCastEvents(proposalId: bigint) {
   const client = usePublicClient();
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
   const [votes, setVotes] = useState<VoteCastEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -29,7 +32,7 @@ export function useVoteCastEvents(proposalId: bigint) {
     async function fetchVotes() {
       try {
         const logs = await client!.getLogs({
-          address: contracts[63].governor,
+          address: c.governor,
           event: voteCastEvent,
           fromBlock: 15_700_000n,
           toBlock: "latest",
@@ -58,7 +61,7 @@ export function useVoteCastEvents(proposalId: bigint) {
     fetchVotes();
     const interval = setInterval(fetchVotes, 60_000);
     return () => clearInterval(interval);
-  }, [client, proposalId]);
+  }, [client, proposalId, c.governor]);
 
   return { votes, isLoading };
 }
