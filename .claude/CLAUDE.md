@@ -34,19 +34,10 @@ pnpm test         # Run tests
 - Font: Inter (UI) + JetBrains Mono (code/addresses)
 - Dark-first design, Olympia palette only
 
-## Key Contracts (Demo v0.2 — Deterministic CREATE2, identical on Chain 61 + 63)
+## Key Contracts (Demo v0.3 — Deterministic CREATE2, identical on Chain 61 + 63)
 
-| Contract | Address |
-|----------|---------|
-| OlympiaGovernor | `0xb85dbc899472756470ef4033b9637ff8fa2fd23d` |
-| OlympiaExecutor | `0x64624f74f77639cba268a6c8bedc2778b707ef9a` |
-| TimelockController | `0xa5839b3e9445f7ee7affdbc796dc0601f9b976c2` |
-| ECFPRegistry | `0xfb4de5674a6b9a301d16876795a74f3bdacfa722` |
-| SanctionsOracle | `0xff2b8d7937d908d81c72d20ac99302ee6acc2709` |
-| OlympiaMemberNFT | `0x73e78d3a3470396325b975fcafa8105a89a9e672` |
-| OlympiaTreasury | `0x035b2e3c189B772e52F4C3DA6c45c84A3bB871bf` |
-
-Addresses defined in `src/lib/contracts/addresses.ts`. ABIs in `src/lib/contracts/abis/`.
+All addresses in `src/lib/contracts/contracts.json` (single source of truth).
+Code reads via `src/lib/contracts/addresses.ts`. ABIs in `src/lib/contracts/abis/`.
 
 ## Supported Chains
 

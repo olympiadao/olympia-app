@@ -87,7 +87,7 @@ export function Sidebar() {
           Demo Config
         </Link>
         <p className="mt-1 px-3 text-xs text-text-subtle">
-          Demo v0.2 · {isTestnet ? "Mordor Testnet" : "Ethereum Classic"}
+          Demo v0.3 · {isTestnet ? "Mordor Testnet" : "Ethereum Classic"}
         </p>
         <div className="mt-2 flex items-center gap-3 px-3">
           <a

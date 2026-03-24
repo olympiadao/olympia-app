@@ -274,7 +274,7 @@ export default function ConfigPage() {
         </h1>
         <p className="mt-1 text-sm text-text-muted">
           Governance parameters, contract addresses, and E2E testing checklist
-          for the Olympia Demo v0.2 on {isTestnet ? "Mordor testnet" : "ETC mainnet"}.
+          for the Olympia Demo v0.3 on {isTestnet ? "Mordor testnet" : "ETC mainnet"}.
         </p>
       </div>
 

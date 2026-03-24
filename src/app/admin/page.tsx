@@ -233,7 +233,7 @@ function BurnLimitationNotice() {
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-semantic-warning" />
         <div className="text-xs text-text-muted">
           <p className="font-medium text-text-secondary">
-            NFT Burn Not Available (v0.2 Limitation)
+            NFT Burn Not Available (v0.3)
           </p>
           <p className="mt-1">
             The OlympiaMemberNFT contract does not expose a public{" "}

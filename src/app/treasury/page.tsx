@@ -157,7 +157,7 @@ export default function TreasuryPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info className="h-4 w-4 text-semantic-info" />
-            Treasury Architecture (v0.2)
+            Treasury Architecture (v0.3)
           </CardTitle>
         </CardHeader>
         <div className="space-y-3 text-sm text-text-secondary">
