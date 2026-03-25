@@ -1,5 +1,7 @@
 # Olympia Governance — CoreDAO for Ethereum Classic
 
+> Web interface for on-chain governance of Ethereum Classic's Olympia DAO. Browse proposals, submit ECFPs, vote, manage treasury, and administer soulbound member NFTs.
+
 ## About
 
 Olympia Governance is the CoreDAO governance application for Ethereum Classic (ETC). It provides a web interface for browsing proposals, submitting ECFPs (Ethereum Classic Funding Proposals), voting, managing treasury funds, and administering soulbound member NFTs.
@@ -12,6 +14,29 @@ Olympia Governance is the CoreDAO governance application for Ethereum Classic (E
 - Treasury monitoring and withdrawal proposals (ECIP-1112)
 - Sanctions compliance checking (ECIP-1119 SanctionsOracle)
 - Timelock-controlled execution
+- Multi-chain support (Mordor Testnet + ETC Mainnet)
+
+## Governance Process
+
+1. Propose — Anyone can submit a governance proposal on-chain
+2. Vote — Soulbound NFT holders cast weighted on-chain votes
+3. Queue — Approved proposals enter a security timelock
+4. Execute — After timelock expires, proposals execute automatically
+5. Disclose — All outcomes publicly reported and verifiable
+
+## Deployed Contracts (Demo v0.3)
+
+Nine contracts deployed via deterministic CREATE2 (salt: OLYMPIA_DEMO_V0_3) — identical addresses on Mordor Testnet (chain 63) and ETC Mainnet (chain 61):
+
+- OlympiaTreasury — Protocol-controlled vault
+- OlympiaGovernor — On-chain governance
+- OlympiaExecutor — Proposal execution
+- TimelockController — Security timelock
+- ECFPRegistry — Proposal registry
+- OlympiaMemberNFT — Soulbound membership
+- SanctionsOracle — Compliance screening
+- OlympiaMemberRenderer — On-chain SVG membership cards
+- MembershipVerifier — Sybil resistance
 
 ## Technology
 
@@ -22,12 +47,17 @@ Olympia Governance is the CoreDAO governance application for Ethereum Classic (E
 
 ## Network
 
-- Mordor Testnet (Chain ID 63)
-- Demo v0.1
+- Mordor Testnet: Chain ID 63
+- ETC Mainnet: Chain ID 61
 
-## Links
+## Web Properties
 
-- DAO: https://olympiadao.org
-- Treasury: https://olympiatreasury.org
-- App: https://core.olympiadao.org
-- GitHub: https://github.com/olympiadao
+- core.olympiadao.org — This app (governance UI)
+- olympiadao.org — Governance landing page
+- olympiatreasury.org — Treasury monitoring dashboard
+- ethereumclassicdao.org — Institutional (Ethereum Classic DAO LLC)
+- github.com/olympiadao — Open-source repositories
+
+## Parent Organization
+
+Ethereum Classic DAO LLC — Wyoming DAO LLC (Filing ID 2025-001671865)
