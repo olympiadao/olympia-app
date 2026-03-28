@@ -37,6 +37,7 @@ import { useCheckSanction } from "@/lib/hooks/use-admin";
 import { useActiveChainId, useExplorerUrl, useChainContracts, useChainMeta } from "@/lib/hooks/use-chain";
 import { KpiCard, formatAmount } from "@/components/treasury/kpi-card";
 import { BalanceChart } from "@/components/treasury/balance-chart";
+import { CountdownBanner } from "@/components/ui/CountdownBanner";
 
 export default function Dashboard() {
   const { proposals, isLoading: proposalsLoading } = useProposals();
@@ -56,6 +57,8 @@ export default function Dashboard() {
           Olympia CoreDAO Governance — Demo v0.2
         </p>
       </div>
+
+      <CountdownBanner />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard
