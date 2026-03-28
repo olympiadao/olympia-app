@@ -25,7 +25,7 @@ export default function MembersPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Members</h1>
         <p className="mt-1 text-sm text-text-muted">
-          OlympiaMemberNFT holders — one soulbound NFT, one vote
+          OlympiaMemberNFT holders — one CoreDAO membership NFT, one vote
         </p>
       </div>
 
@@ -160,7 +160,7 @@ export default function MembersPage() {
         </CardHeader>
         <div className="space-y-3 text-sm text-text-secondary">
           <p>
-            Olympia uses soulbound (non-transferable) ERC-721 NFTs for
+            Olympia uses non-transferable ERC-721 CoreDAO membership NFTs for
             governance voting. Each NFT represents exactly one vote.
           </p>
           <p>

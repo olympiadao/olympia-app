@@ -183,7 +183,7 @@ export default function Dashboard() {
           <p>
             <strong className="text-text-primary">1.</strong> Members hold{" "}
             <Link href="/members" className="text-brand-green hover:underline">
-              soulbound NFTs
+              CoreDAO membership NFTs
             </Link>{" "}
             — one NFT equals one vote
           </p>
