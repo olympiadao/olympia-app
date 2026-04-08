@@ -21,7 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://core.olympiadao.org"),
   title: {
-    default: "Olympia Governance — Olympia DAO for Ethereum Classic",
+    default: "Olympia Governance — On-Chain Governance for Ethereum Classic",
     template: "%s | Olympia Governance",
   },
   description:
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://core.olympiadao.org",
     siteName: "Olympia Governance",
-    title: "Olympia Governance — Olympia DAO for Ethereum Classic",
+    title: "Olympia Governance — On-Chain Governance for Ethereum Classic",
     description:
       "Browse proposals, vote, and manage the treasury. On-chain governance for ETC.",
     images: [
@@ -60,13 +60,13 @@ export const metadata: Metadata = {
         url: "https://core.olympiadao.org/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Olympia Olympia DAO Governance",
+        alt: "Olympia DAO Governance",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Olympia Governance — Olympia DAO for Ethereum Classic",
+    title: "Olympia Governance — On-Chain Governance for Ethereum Classic",
     description: "On-chain governance for Ethereum Classic",
     images: ["https://core.olympiadao.org/og-image.png"],
   },

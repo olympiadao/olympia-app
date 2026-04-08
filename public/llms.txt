@@ -1,10 +1,10 @@
-# Olympia Governance — CoreDAO for Ethereum Classic
+# Olympia DAO — On-Chain Governance for Ethereum Classic
 
 > Web interface for on-chain governance of Ethereum Classic's Olympia DAO. Browse proposals, submit ECFPs, vote, manage treasury, and administer soulbound member NFTs.
 
 ## About
 
-Olympia Governance is the CoreDAO governance application for Ethereum Classic (ETC). It provides a web interface for browsing proposals, submitting ECFPs (Ethereum Classic Funding Proposals), voting, managing treasury funds, and administering soulbound member NFTs.
+Olympia Governance is the Olympia DAO governance application for Ethereum Classic (ETC). It provides a web interface for browsing proposals, submitting ECFPs (Ethereum Classic Funding Proposals), voting, managing treasury funds, and administering soulbound member NFTs.
 
 ## Key Features
 
