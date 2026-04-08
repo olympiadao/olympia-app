@@ -43,6 +43,10 @@ export const metadata: Metadata = {
     "block rewards",
     "EIP-1559",
     "ECIP-1112",
+    "ECIP-1121",
+    "Fusaka",
+    "EVM upgrade",
+    "EVM compatibility",
   ],
   authors: [
     { name: "Cody Burns", url: "https://github.com/realcodywburns" },
