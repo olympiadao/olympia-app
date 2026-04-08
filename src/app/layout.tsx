@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://core.olympiadao.org"),
+  metadataBase: new URL("https://app.olympiadao.org"),
   title: {
     default: "Olympia Governance — On-Chain Governance for Ethereum Classic",
     template: "%s | Olympia Governance",
@@ -50,14 +50,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://core.olympiadao.org",
+    url: "https://app.olympiadao.org",
     siteName: "Olympia Governance",
     title: "Olympia Governance — On-Chain Governance for Ethereum Classic",
     description:
       "Browse proposals, vote, and manage the treasury. On-chain governance for ETC.",
     images: [
       {
-        url: "https://core.olympiadao.org/og-image.png",
+        url: "https://app.olympiadao.org/og-image.png",
         width: 1200,
         height: 630,
         alt: "Olympia DAO Governance",
@@ -68,14 +68,14 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Olympia Governance — On-Chain Governance for Ethereum Classic",
     description: "On-chain governance for Ethereum Classic",
-    images: ["https://core.olympiadao.org/og-image.png"],
+    images: ["https://app.olympiadao.org/og-image.png"],
   },
   icons: {
     icon: "/favicon.ico",
     apple: "/apple-icon.png",
   },
   robots: { index: true, follow: true },
-  alternates: { canonical: "https://core.olympiadao.org" },
+  alternates: { canonical: "https://app.olympiadao.org" },
   creator: "Ethereum Classic DAO",
   other: { "color-scheme": "dark" },
   formatDetection: { telephone: false, email: false },

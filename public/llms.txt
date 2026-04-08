@@ -52,7 +52,7 @@ Nine contracts deployed via deterministic CREATE2 (salt: OLYMPIA_DEMO_V0_3) — 
 
 ## Web Properties
 
-- core.olympiadao.org — This app (governance UI)
+- app.olympiadao.org — This app (governance UI)
 - olympiadao.org — Governance landing page
 - olympiatreasury.org — Treasury monitoring dashboard
 - ethereumclassicdao.org — Institutional (Ethereum Classic DAO LLC)
