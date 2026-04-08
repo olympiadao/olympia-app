@@ -50,6 +50,16 @@ Nine contracts deployed via deterministic CREATE2 (salt: OLYMPIA_DEMO_V0_3) — 
 - Mordor Testnet: Chain ID 63
 - ETC Mainnet: Chain ID 61
 
+## Olympia Protocol ECIPs
+
+The Olympia upgrade requires node operators to run updated client software implementing three client-facing ECIPs:
+
+- ECIP-1111 — EIP-1559 fee market and protocol upgrades
+- ECIP-1112 — Olympia Treasury Contract
+- ECIP-1121 — EVM alignment with Ethereum's Fusaka execution layer
+
+ECIP-1121 brings Ethereum Classic's EVM to full Fusaka parity, implemented independently by all three clients (core-geth, Besu, Fukuii).
+
 ## Web Properties
 
 - core.olympiadao.org — This app (governance UI)
