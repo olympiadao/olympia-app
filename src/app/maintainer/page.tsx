@@ -164,7 +164,7 @@ function MintSection() {
         <div className="flex items-start gap-2">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-semantic-info" />
           <p className="text-xs text-text-muted">
-            Minting a CoreDAO membership NFT grants one governance vote. The NFT
+            Minting an Olympia DAO membership NFT grants one governance vote. The NFT
             automatically delegates voting power to the holder — no manual
             delegation needed. NFTs cannot be transferred. One address = one
             NFT = one vote.

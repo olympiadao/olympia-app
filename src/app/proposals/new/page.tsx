@@ -134,7 +134,7 @@ export default function NewProposalPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">New Proposal</h1>
         <p className="mt-1 text-sm text-text-muted">
-          Create a governance proposal for the Olympia CoreDAO
+          Create a governance proposal for Olympia DAO
         </p>
       </div>
 

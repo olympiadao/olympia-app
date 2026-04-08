@@ -18,7 +18,7 @@ const navItems = [
   { href: "/members", label: "Members", icon: Users },
   { href: "/treasury", label: "Treasury", icon: Landmark },
   { href: "/how-it-works", label: "How It Works", icon: BookOpen },
-  { href: "/admin", label: "Maintainer", icon: Shield },
+  { href: "/maintainer", label: "Maintainer", icon: Shield },
 ];
 
 export function MobileNav() {

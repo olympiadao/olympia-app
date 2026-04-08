@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Olympia Governance — CoreDAO for Ethereum Classic",
+    name: "Olympia Governance — Olympia DAO for Ethereum Classic",
     short_name: "Olympia",
     description:
-      "CoreDAO governance application for Ethereum Classic. Browse proposals, vote, and manage treasury.",
+      "Olympia DAO governance application for Ethereum Classic. Browse proposals, vote, and manage treasury.",
     start_url: "/",
     display: "standalone",
     background_color: "#0a0f10",

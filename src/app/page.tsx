@@ -54,7 +54,7 @@ export default function Dashboard() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="mt-1 text-sm text-text-muted">
-          Olympia CoreDAO Governance — Demo v0.3
+          Olympia DAO Governance — Demo v0.3
         </p>
       </div>
 
@@ -183,7 +183,7 @@ export default function Dashboard() {
           <p>
             <strong className="text-text-primary">1.</strong> Members hold{" "}
             <Link href="/members" className="text-brand-green hover:underline">
-              CoreDAO membership NFTs
+              Olympia DAO membership NFTs
             </Link>{" "}
             — one NFT equals one vote
           </p>

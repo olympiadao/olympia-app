@@ -21,11 +21,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://core.olympiadao.org"),
   title: {
-    default: "Olympia Governance — CoreDAO for Ethereum Classic",
+    default: "Olympia Governance — Olympia DAO for Ethereum Classic",
     template: "%s | Olympia Governance",
   },
   description:
-    "CoreDAO governance application for Ethereum Classic. Browse proposals, vote, manage treasury, and participate in on-chain governance.",
+    "Olympia DAO governance application for Ethereum Classic. Browse proposals, vote, manage treasury, and participate in on-chain governance.",
   keywords: [
     "Ethereum Classic",
     "ETC",
@@ -37,6 +37,11 @@ export const metadata: Metadata = {
     "treasury",
     "ECIP-1113",
     "ECIP-1114",
+    "basefee",
+    "miner rewards untouched",
+    "block rewards",
+    "EIP-1559",
+    "ECIP-1112",
   ],
   authors: [
     { name: "Cody Burns", url: "https://github.com/realcodywburns" },
@@ -47,7 +52,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://core.olympiadao.org",
     siteName: "Olympia Governance",
-    title: "Olympia Governance — CoreDAO for Ethereum Classic",
+    title: "Olympia Governance — Olympia DAO for Ethereum Classic",
     description:
       "Browse proposals, vote, and manage the treasury. On-chain governance for ETC.",
     images: [
@@ -55,13 +60,13 @@ export const metadata: Metadata = {
         url: "https://core.olympiadao.org/og-image.png",
         width: 1200,
         height: 630,
-        alt: "Olympia CoreDAO Governance",
+        alt: "Olympia Olympia DAO Governance",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Olympia Governance — CoreDAO for Ethereum Classic",
+    title: "Olympia Governance — Olympia DAO for Ethereum Classic",
     description: "On-chain governance for Ethereum Classic",
     images: ["https://core.olympiadao.org/og-image.png"],
   },
