@@ -1,5 +1,7 @@
 # Olympia Governance App
 
+> **Production** — Olympia ECIP spec compliant. Prepared for future production deployment.
+
 CoreDAO governance UI for Ethereum Classic — browse proposals, vote, manage treasury, and participate in on-chain governance.
 
 **URL:** [app.olympiadao.org](https://app.olympiadao.org)
@@ -67,9 +69,9 @@ pnpm test         # Run tests
 
 | Branch | Purpose |
 |--------|---------|
-| `demo_v0.1` | Preserved snapshot — fast-iteration development, not ECIP-aligned |
-| `demo_v0.2` | Active development — spec-compliant, multi-chain, CREATE2 contracts |
-| `main` | Production — deployed after Olympia activates on ETC mainnet |
+| `main` | Production target — prepared for deployment after Olympia activates on ETC mainnet |
+| `demo_v0.2` | Active development — spec-compliant, live testing on Mordor + ETC (pre-Olympia) |
+| `demo_v0.1` | Archived — initial scaffolding, not spec compliant |
 
 ## Related Repos
 

@@ -21,7 +21,7 @@ const fundingSteps = [
     icon: Landmark,
     title: "Treasury",
     description:
-      "Protocol-managed vault accumulates basefee revenue and voluntary on-chain donations. Real-time monitoring via public dashboard.",
+      "Protocol-managed vault accumulates basefee revenue, voluntary on-chain donations, and block rewards from miners who point their coinbase address to the treasury. Real-time monitoring via public dashboard.",
     detail: "Immutable vault with on-chain transparency",
   },
   {
