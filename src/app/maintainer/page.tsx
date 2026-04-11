@@ -164,7 +164,7 @@ function MintSection() {
         <div className="flex items-start gap-2">
           <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-semantic-info" />
           <p className="text-xs text-text-muted">
-            Minting a CoreDAO membership NFT grants one governance vote. The NFT
+            Minting an Olympia DAO membership NFT grants one governance vote. The NFT
             automatically delegates voting power to the holder — no manual
             delegation needed. NFTs cannot be transferred. One address = one
             NFT = one vote.
@@ -233,7 +233,7 @@ function BurnLimitationNotice() {
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-semantic-warning" />
         <div className="text-xs text-text-muted">
           <p className="font-medium text-text-secondary">
-            NFT Burn Not Available (v0.2 Limitation)
+            NFT Burn Not Available (v0.3)
           </p>
           <p className="mt-1">
             The OlympiaMemberNFT contract does not expose a public{" "}

@@ -1,0 +1,52 @@
+{
+  "version": "0.3",
+  "salt": "OLYMPIA_DEMO_V0_3",
+  "deployer": "0xAF21767a2c5b3acFFB64dC64CD5A876e91155bD0",
+  "contracts": {
+    "governor": {
+      "name": "OlympiaGovernor",
+      "address": "0xe763f13cC89292C4F279BEF2aD54F1E89A3a87d3",
+      "role": "Proposal and voting engine"
+    },
+    "executor": {
+      "name": "OlympiaExecutor",
+      "address": "0x292eBe07d11850Dfc94Cbf9c72C3A054d23cAB54",
+      "role": "Treasury withdrawal executor"
+    },
+    "timelock": {
+      "name": "TimelockController",
+      "address": "0x3d19fEfB093Abad60421B89CF48f4569aaae39b6",
+      "role": "Security delay enforcement"
+    },
+    "ecfpRegistry": {
+      "name": "ECFPRegistry",
+      "address": "0xe2b437284B0fc7A1064Afd1f60686c7cEAa7343a",
+      "role": "Proposal metadata registry"
+    },
+    "sanctionsOracle": {
+      "name": "SanctionsOracle",
+      "address": "0xAA93C0d1cCf9a0Ec43A2EE8CD1AfFC473b82f36A",
+      "role": "OFAC compliance layer"
+    },
+    "memberNFT": {
+      "name": "OlympiaMemberNFT",
+      "address": "0xb4D45A498994C89553A9c923c6b85F7623C0843e",
+      "role": "Soulbound governance NFT (1 = 1 vote)"
+    },
+    "renderer": {
+      "name": "OlympiaMemberRenderer",
+      "address": "0xE29d0f47043F40059AB5DE7C8F7E7B665a7caCCf",
+      "role": "On-chain SVG art generator"
+    },
+    "verifier": {
+      "name": "MembershipVerifier",
+      "address": "0xb6274251Fb8F1D865A0B62bba9fF31c1bfEdccE6",
+      "role": "Sybil resistance (attestation + merkle)"
+    },
+    "treasury": {
+      "name": "OlympiaTreasury",
+      "address": "0x60d0A7394f9Cd5C469f9F5Ec4F9C803F5294d79b",
+      "role": "Protocol-funded vault"
+    }
+  }
+}

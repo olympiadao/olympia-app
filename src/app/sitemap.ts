@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://core.olympiadao.org";
+  const baseUrl = "https://app.olympiadao.org";
 
   return [
     {
@@ -41,10 +41,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/admin`,
+      url: `${baseUrl}/contracts`,
       lastModified: new Date(),
       changeFrequency: "monthly",
-      priority: 0.5,
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/maintainer`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.3,
     },
   ];
 }

@@ -134,7 +134,7 @@ export default function NewProposalPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">New Proposal</h1>
         <p className="mt-1 text-sm text-text-muted">
-          Create a governance proposal for the Olympia CoreDAO
+          Create a governance proposal for Olympia DAO
         </p>
       </div>
 
@@ -180,7 +180,7 @@ export default function NewProposalPage() {
                 <option value="">Select a category…</option>
                 {PROPOSAL_CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>
-                    {c.label} — {c.description}
+                    {c.label} : {c.description}
                   </option>
                 ))}
               </select>

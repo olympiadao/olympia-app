@@ -52,6 +52,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: "https://core.olympiadao.org/sitemap.xml",
+    sitemap: "https://app.olympiadao.org/sitemap.xml",
   };
 }

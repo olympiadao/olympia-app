@@ -157,7 +157,7 @@ export default function TreasuryPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Info className="h-4 w-4 text-semantic-info" />
-            Treasury Architecture (v0.2)
+            Treasury Architecture (v0.3)
           </CardTitle>
         </CardHeader>
         <div className="space-y-3 text-sm text-text-secondary">
@@ -165,7 +165,7 @@ export default function TreasuryPage() {
             The treasury is a <strong className="text-text-primary">pure Solidity contract</strong> with
             an <strong className="text-text-primary">immutable executor</strong> address
             set at deployment. There are no admin functions, no roles, and no
-            upgrade path — the executor address can never be changed.
+            upgrade path : the executor address can never be changed.
           </p>
           <p>
             Only two functions exist:{" "}

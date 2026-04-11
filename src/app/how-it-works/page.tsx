@@ -14,14 +14,14 @@ const fundingSteps = [
     icon: Wallet,
     title: "Transaction Fees",
     description:
-      "Every transaction pays a basefee via EIP-1559. The basefee is directed to the Treasury. Block rewards and tips remain completely untouched — miners are unaffected.",
+      "Every transaction pays a basefee via EIP-1559. The basefee is directed to the Treasury. Block rewards and tips remain completely untouched. Miners are unaffected.",
     detail: "Funded by basefee revenue, not inflation",
   },
   {
     icon: Landmark,
     title: "Treasury",
     description:
-      "Protocol-managed vault accumulates basefee revenue, voluntary donations, and mining rewards directed to the treasury address. Real-time monitoring via public dashboard.",
+      "Protocol-managed vault accumulates basefee revenue and voluntary on-chain donations. Real-time monitoring via public dashboard.",
     detail: "Immutable vault with on-chain transparency",
   },
   {
@@ -114,7 +114,7 @@ export default function HowItWorksPage() {
           From Proposal to Execution
         </h2>
         <p className="mb-8 max-w-2xl text-sm text-text-muted">
-          Five stages from idea to execution — every step on-chain, transparent,
+          Five stages from idea to execution: every step on-chain, transparent,
           and auditable.
         </p>
 

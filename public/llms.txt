@@ -1,10 +1,10 @@
-# Olympia Governance — CoreDAO for Ethereum Classic
+# Olympia DAO — On-Chain Governance for Ethereum Classic
 
 > Web interface for on-chain governance of Ethereum Classic's Olympia DAO. Browse proposals, submit ECFPs, vote, manage treasury, and administer soulbound member NFTs.
 
 ## About
 
-Olympia Governance is the CoreDAO governance application for Ethereum Classic (ETC). It provides a web interface for browsing proposals, submitting ECFPs (Ethereum Classic Funding Proposals), voting, managing treasury funds, and administering soulbound member NFTs.
+Olympia Governance is the Olympia DAO governance application for Ethereum Classic (ETC). It provides a web interface for browsing proposals, submitting ECFPs (Ethereum Classic Funding Proposals), voting, managing treasury funds, and administering soulbound member NFTs.
 
 ## Key Features
 
@@ -18,10 +18,10 @@ Olympia Governance is the CoreDAO governance application for Ethereum Classic (E
 
 ## Governance Process
 
-1. Propose — Anyone can submit a governance proposal on-chain
-2. Vote — Soulbound NFT holders cast weighted on-chain votes
-3. Queue — Approved proposals enter a security timelock
-4. Execute — After timelock expires, proposals execute automatically
+1. Propose: Anyone can submit a governance proposal on-chain
+2. Vote: Soulbound NFT holders cast weighted on-chain votes
+3. Queue: Approved proposals enter a security timelock
+4. Execute: After timelock expires, proposals execute automatically
 5. Disclose — All outcomes publicly reported and verifiable
 
 ## Deployed Contracts (Demo v0.3)
@@ -69,7 +69,7 @@ ECIP-1121 brings Ethereum Classic's EVM to full Fusaka parity, implemented indep
 
 ## Web Properties
 
-- core.olympiadao.org — This app (governance UI)
+- app.olympiadao.org — This app (governance UI)
 - olympiadao.org — Governance landing page
 - olympiatreasury.org — Treasury monitoring dashboard
 - ethereumclassicdao.org — Institutional (Ethereum Classic DAO LLC)

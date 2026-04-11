@@ -25,7 +25,7 @@ export default function MembersPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Members</h1>
         <p className="mt-1 text-sm text-text-muted">
-          OlympiaMemberNFT holders — one CoreDAO membership NFT, one vote
+          OlympiaMemberNFT holders : one membership NFT, one vote
         </p>
       </div>
 
@@ -148,7 +148,7 @@ export default function MembersPage() {
             proposal.
           </p>
           <p>
-            This snapshot mechanism prevents flash-minting attacks — an
+            This snapshot mechanism prevents flash-minting attacks : an
             adversary cannot mint NFTs right before a vote to swing the outcome.
           </p>
         </div>
@@ -160,17 +160,18 @@ export default function MembersPage() {
         </CardHeader>
         <div className="space-y-3 text-sm text-text-secondary">
           <p>
-            Olympia uses non-transferable ERC-721 CoreDAO membership NFTs for
+            Olympia uses non-transferable ERC-721 membership NFTs for
             governance voting. Each NFT represents exactly one vote.
           </p>
           <p>
-            NFTs are minted by a DAO maintainer and automatically delegate voting
-            power to the holder. No manual delegation is needed.
+            NFTs are minted by authorized DAO maintainers and automatically
+            delegate voting power to the holder. No manual delegation is needed.
           </p>
           <p>
-            Identity verification happens at the application layer (e.g.,
-            BrightID, Gitcoin Passport). The MINTER_ROLE holder is responsible
-            for KYC before minting.
+            Eligibility is determined at the application layer using
+            Sybil-resistance mechanisms. Optional decentralized attestation
+            providers (e.g., BrightID, Gitcoin Passport, Proof of Humanity)
+            may be added by DAO vote.
           </p>
         </div>
       </Card>

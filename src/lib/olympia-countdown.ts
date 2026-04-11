@@ -1,4 +1,4 @@
-export const OLYMPIA_ACTIVATION_BLOCK: number | null = null; // Update when CDC-23 decides
+export const OLYMPIA_ACTIVATION_BLOCK: number | null = null; // Update when the core developers call sets the block
 export const AVG_BLOCK_TIME_SECONDS = 13;
 
 export type CountdownStatus = "tbd" | "pending" | "activated";

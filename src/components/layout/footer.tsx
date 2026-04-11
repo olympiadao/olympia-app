@@ -11,9 +11,8 @@ export function Footer() {
     <footer className="border-t border-border-default px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
-          <span className="flex items-center gap-2 text-sm font-semibold tracking-tight text-text-muted">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/olympia-wordmark.svg" alt="" className="h-4" />
+          <span className="text-sm font-bold tracking-tight text-text-primary dark:text-brand-green">
+            OLYMPIA
           </span>
 
           <div className="flex items-center gap-5">
@@ -41,7 +40,7 @@ export function Footer() {
         </div>
 
         <p className="mt-6 text-center text-[10px] text-text-subtle">
-          On-chain governance and treasury infrastructure for Ethereum Classic.
+          On-chain governance and treasury infrastructure for Ethereum Classic&rsquo;s core development, critical infrastructure, and network security.
         </p>
       </div>
     </footer>
