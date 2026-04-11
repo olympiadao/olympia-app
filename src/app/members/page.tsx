@@ -25,7 +25,7 @@ export default function MembersPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Members</h1>
         <p className="mt-1 text-sm text-text-muted">
-          OlympiaMemberNFT holders — one membership NFT, one vote
+          OlympiaMemberNFT holders : one membership NFT, one vote
         </p>
       </div>
 
@@ -148,7 +148,7 @@ export default function MembersPage() {
             proposal.
           </p>
           <p>
-            This snapshot mechanism prevents flash-minting attacks — an
+            This snapshot mechanism prevents flash-minting attacks : an
             adversary cannot mint NFTs right before a vote to swing the outcome.
           </p>
         </div>

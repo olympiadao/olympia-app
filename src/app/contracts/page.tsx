@@ -18,7 +18,7 @@ export default function ContractsPage() {
         On-Chain Infrastructure
       </h1>
       <p className="mb-8 max-w-2xl text-sm text-text-muted">
-        Nine contracts deployed via deterministic CREATE2 — identical addresses
+        Nine contracts deployed via deterministic CREATE2 : identical addresses
         on Mordor Testnet and ETC Mainnet.
       </p>
 

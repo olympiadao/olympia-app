@@ -165,7 +165,7 @@ export default function TreasuryPage() {
             The treasury is a <strong className="text-text-primary">pure Solidity contract</strong> with
             an <strong className="text-text-primary">immutable executor</strong> address
             set at deployment. There are no admin functions, no roles, and no
-            upgrade path — the executor address can never be changed.
+            upgrade path : the executor address can never be changed.
           </p>
           <p>
             Only two functions exist:{" "}

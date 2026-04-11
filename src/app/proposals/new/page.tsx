@@ -180,7 +180,7 @@ export default function NewProposalPage() {
                 <option value="">Select a category…</option>
                 {PROPOSAL_CATEGORIES.map((c) => (
                   <option key={c.value} value={c.value}>
-                    {c.label} — {c.description}
+                    {c.label} : {c.description}
                   </option>
                 ))}
               </select>

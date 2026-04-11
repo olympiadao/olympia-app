@@ -150,7 +150,7 @@ const checklistSections: ChecklistSection[] = [
       },
       {
         id: "prop-active",
-        label: "Wait 1 block — status transitions to 'Active'",
+        label: "Wait 1 block: status transitions to 'Active'",
       },
     ],
   },
@@ -164,7 +164,7 @@ const checklistSections: ChecklistSection[] = [
       },
       {
         id: "vote-end",
-        label: "Wait 100 blocks (~22 min) — status transitions to 'Succeeded'",
+        label: "Wait 100 blocks (~22 min): status transitions to 'Succeeded'",
       },
     ],
   },
@@ -173,12 +173,12 @@ const checklistSections: ChecklistSection[] = [
     items: [
       {
         id: "queue",
-        label: "Queue the proposal — status transitions to 'Queued'",
+        label: "Queue the proposal: status transitions to 'Queued'",
       },
       { id: "timelock", label: "Wait for timelock (1 hour)" },
       {
         id: "execute",
-        label: "Execute the proposal — status transitions to 'Executed'",
+        label: "Execute the proposal: status transitions to 'Executed'",
       },
     ],
   },
@@ -206,7 +206,7 @@ const checklistSections: ChecklistSection[] = [
       {
         id: "sanction-l1",
         label:
-          "Attempt to create proposal to sanctioned address — should fail (Layer 1)",
+          "Attempt to create proposal to sanctioned address: should fail (Layer 1)",
       },
       {
         id: "sanction-l2",
@@ -499,7 +499,7 @@ export default function ConfigPage() {
         <div className="space-y-3 text-sm text-text-secondary">
           <div className="rounded-lg border border-border-subtle bg-bg-elevated p-3">
             <p className="font-medium text-text-primary">
-              Layer 1 — Propose Gate
+              Layer 1: Propose Gate
             </p>
             <p className="mt-1 text-xs">
               Governor scans calldata during propose(). If the recipient is
@@ -508,7 +508,7 @@ export default function ConfigPage() {
           </div>
           <div className="rounded-lg border border-border-subtle bg-bg-elevated p-3">
             <p className="font-medium text-text-primary">
-              Layer 2 — Mid-Vote Cancel
+              Layer 2: Mid-Vote Cancel
             </p>
             <p className="mt-1 text-xs">
               Anyone can call cancelIfSanctioned(proposalId) at any time. If
@@ -518,7 +518,7 @@ export default function ConfigPage() {
           </div>
           <div className="rounded-lg border border-border-subtle bg-bg-elevated p-3">
             <p className="font-medium text-text-primary">
-              Layer 3 — Executor Gate
+              Layer 3: Executor Gate
             </p>
             <p className="mt-1 text-xs">
               OlympiaExecutor checks isSanctioned(recipient) as the final step

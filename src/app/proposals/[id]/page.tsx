@@ -175,7 +175,7 @@ export default function ProposalDetailPage({
           blocked={isBlocked}
         />
 
-        {/* Sanctions alert — Layer 2 defense */}
+        {/* Sanctions alert: Layer 2 defense */}
         {isCancellable && (
           <Card className="border-semantic-error/40 bg-semantic-error/10">
             <div className="flex items-start gap-2">
@@ -453,7 +453,7 @@ function StateGuidance({
               : againstVotes > forVotes
                 ? `It was voted down ${againstVotes.toString()} Against to ${forVotes.toString()} For.`
                 : totalVotes === 0n
-                  ? "No votes were cast — quorum was not reached."
+                  ? "No votes were cast: quorum was not reached."
                   : `It tied ${forVotes.toString()}-${againstVotes.toString()} and did not achieve a majority.`
           }`,
           color: "text-orange-400",
@@ -548,19 +548,19 @@ function ProposalActions({
   const outcomeLabel = isExecuted
     ? "Completed"
     : blocked
-      ? "Not executed — sanctions block"
+      ? "Not executed: sanctions block"
       : state === ProposalState.Defeated
-        ? "Not executed — proposal rejected"
+        ? "Not executed: proposal rejected"
         : state === ProposalState.Canceled
-          ? "Not executed — proposal canceled"
+          ? "Not executed: proposal canceled"
           : state === ProposalState.Expired
-            ? "Not executed — proposal expired"
+            ? "Not executed: proposal expired"
             : null;
 
   function statusDetail(): string {
     if (blocked) return "Not executed. Sanctions block.";
     if (state === ProposalState.Defeated) {
-      if (totalVotes === 0n) return "Not executed. No votes were cast — quorum was not reached.";
+      if (totalVotes === 0n) return "Not executed. No votes were cast: quorum was not reached.";
       if (againstVotes > forVotes) return `Not executed. Voted down ${againstVotes.toString()} Against to ${forVotes.toString()} For.`;
       if (forVotes > againstVotes) return `Not executed. Did not reach the 10% quorum threshold.`;
       return `Not executed. Tied ${forVotes.toString()}-${againstVotes.toString()} and did not achieve a majority.`;
@@ -771,7 +771,7 @@ function GovernancePipeline({
           {
             label: "Sanctioned",
             detail:
-              "Recipient is on the sanctions list — awaiting cancellation",
+              "Recipient is on the sanctions list: awaiting cancellation",
             reached: true,
             skipped: true,
             rejected: false,
