@@ -19,7 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${baseUrl}/proposals/new`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "weekly",
       priority: 0.7,
     },
     {
@@ -37,19 +37,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: `${baseUrl}/how-it-works`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "weekly",
       priority: 0.7,
     },
     {
       url: `${baseUrl}/contracts`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "weekly",
       priority: 0.6,
     },
     {
       url: `${baseUrl}/maintainer`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: "weekly",
       priority: 0.3,
     },
   ];
