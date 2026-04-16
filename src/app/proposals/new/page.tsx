@@ -2,15 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { BaseError, ContractFunctionRevertedError, keccak256, toBytes } from "viem";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { BaseError, ContractFunctionRevertedError, formatEther, keccak256, toBytes } from "viem";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { abis } from "@/lib/contracts/config";
 import { useChainContracts } from "@/lib/hooks/use-chain";
 import { useCheckSanction } from "@/lib/hooks/use-admin";
-import { useSubmitDraft, useSubmissionBond } from "@/lib/hooks/use-ecfp-registry";
-import { ShieldAlert, FileText, Landmark } from "lucide-react";
+import {
+  useSubmitDraft,
+  useSubmissionBond,
+  useActiveDraftCount,
+  usePendingRefund,
+  useClaimRefund,
+  useMaxDraftsPerAddress,
+} from "@/lib/hooks/use-ecfp-registry";
+import { ShieldAlert, FileText, Landmark, AlertCircle } from "lucide-react";
 import { PROPOSAL_CATEGORIES } from "@/lib/utils/proposal-categories";
 
 function parseContractError(error: Error): string {
@@ -41,6 +48,8 @@ export default function NewProposalPage() {
   const [description, setDescription] = useState("");
   const [targetAddress, setTargetAddress] = useState("");
   const [etcAmount, setEtcAmount] = useState("");
+  const [bondAcknowledged, setBondAcknowledged] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
 
   const hasTreasuryAction = !!(targetAddress && etcAmount && parseFloat(etcAmount) > 0);
   const isValidAddress = /^0x[0-9a-fA-F]{40}$/.test(targetAddress);
@@ -48,8 +57,14 @@ export default function NewProposalPage() {
     isValidAddress ? (targetAddress as `0x${string}`) : undefined
   );
 
+  const { address: connectedAddress } = useAccount();
+
   // ECFPRegistry path (treasury proposals)
   const { data: submissionBond } = useSubmissionBond();
+  const { data: maxDrafts } = useMaxDraftsPerAddress();
+  const { data: activeDrafts } = useActiveDraftCount(connectedAddress);
+  const { data: pendingRefund } = usePendingRefund(connectedAddress);
+  const { claimRefund, isPending: isClaimPending } = useClaimRefund();
   const {
     submit: submitDraft,
     isPending: isDraftPending,
@@ -78,6 +93,9 @@ export default function NewProposalPage() {
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    // Honeypot: bots fill this field, humans never see it
+    if (honeypot) return;
 
     const prefixedTitle = category ? `[${category}] ${title}` : title;
     const fullDescription = description
@@ -130,6 +148,12 @@ export default function NewProposalPage() {
     );
   }
 
+  const hasPendingRefund = pendingRefund !== undefined && (pendingRefund as bigint) > 0n;
+  const bondEtc = submissionBond ? formatEther(submissionBond as bigint) : null;
+  const draftsUsed = activeDrafts !== undefined ? Number(activeDrafts as bigint) : null;
+  const draftsMax = maxDrafts !== undefined ? Number(maxDrafts as bigint) : null;
+  const atDraftCap = draftsUsed !== null && draftsMax !== null && draftsUsed >= draftsMax;
+
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
@@ -138,6 +162,32 @@ export default function NewProposalPage() {
           Create a governance proposal for Olympia DAO
         </p>
       </div>
+
+      {hasPendingRefund && (
+        <Card className="border-brand-green/40 bg-brand-green/5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="text-sm">
+              <p className="font-medium text-brand-green">Pending Bond Refund</p>
+              <p className="mt-0.5 text-text-muted">
+                You have{" "}
+                <span className="font-mono font-medium text-text-primary">
+                  {formatEther(pendingRefund as bigint)} ETC
+                </span>{" "}
+                available to claim from a previously activated proposal.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="shrink-0 border-brand-green/40 text-brand-green hover:bg-brand-green/10"
+              onClick={() => claimRefund()}
+              disabled={isClaimPending}
+            >
+              {isClaimPending ? "Claiming…" : "Claim Refund"}
+            </Button>
+          </div>
+        </Card>
+      )}
 
       <Card>
         <div className="flex items-start gap-2">
@@ -153,11 +203,36 @@ export default function NewProposalPage() {
               <strong>100-block governance vote</strong> (~22 min on Mordor).
               Requires 10% quorum.
             </p>
+            {bondEtc && (
+              <p className="mt-1 text-text-secondary">
+                <strong>Submission bond: {bondEtc} ETC.</strong> Returned in full
+                when activated. Forfeited to the treasury if expired as spam or
+                low quality.
+              </p>
+            )}
+            {draftsUsed !== null && draftsMax !== null && (
+              <p className={atDraftCap ? "font-medium text-semantic-error" : ""}>
+                Draft slots: {draftsUsed} / {draftsMax} used
+                {atDraftCap && " — cap reached, withdraw or wait for activation"}
+              </p>
+            )}
           </div>
         </div>
       </Card>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Honeypot: invisible to humans, filled by bots. Field name is intentionally generic. */}
+        <input
+          name="url"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0 }}
+        />
+
         <Card>
           <CardHeader>
             <CardTitle>Proposal Details</CardTitle>
@@ -303,6 +378,31 @@ export default function NewProposalPage() {
           </p>
         )}
 
+        {hasTreasuryAction && bondEtc && (
+          <Card className="border-border-default bg-bg-elevated">
+            <div className="flex items-start gap-3">
+              <input
+                id="bond-ack"
+                type="checkbox"
+                checked={bondAcknowledged}
+                onChange={(e) => setBondAcknowledged(e.target.checked)}
+                className="mt-1 h-4 w-4 shrink-0 accent-brand-green"
+              />
+              <label htmlFor="bond-ack" className="text-xs text-text-muted">
+                <span className="block font-medium text-text-secondary">Bond Agreement</span>
+                I understand that submitting this proposal requires a{" "}
+                <strong className="text-text-primary">{bondEtc} ETC bond</strong> held by
+                the ECFPRegistry contract. This bond will be{" "}
+                <strong>returned in full</strong> if my proposal is activated by the
+                council, or <strong>forfeited to the treasury</strong> if my proposal
+                is marked as spam, low quality, out of scope, or otherwise fails the
+                intake review. I confirm this proposal represents genuine work with
+                verifiable deliverables.
+              </label>
+            </div>
+          </Card>
+        )}
+
         {error && (
           <Card className="border-semantic-error/40 bg-semantic-error/10">
             <div className="flex items-start gap-2">
@@ -315,12 +415,29 @@ export default function NewProposalPage() {
           </Card>
         )}
 
+        {atDraftCap && (
+          <div className="flex items-start gap-2 text-xs text-semantic-error">
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <p>
+              Draft cap reached ({draftsUsed}/{draftsMax}). Withdraw an existing
+              draft or wait for one to be activated before submitting another
+              funding proposal.
+            </p>
+          </div>
+        )}
+
         <Button
           type="submit"
           size="lg"
           className="w-full"
           disabled={
-            !category || !title || isPending || isConfirming || isSanctioned === true
+            !category ||
+            !title ||
+            isPending ||
+            isConfirming ||
+            isSanctioned === true ||
+            atDraftCap ||
+            (hasTreasuryAction && bondEtc !== null && !bondAcknowledged)
           }
         >
           {isPending || isConfirming ? "Submitting…" : "Submit Proposal"}

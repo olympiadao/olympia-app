@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { isAddress } from "viem";
+import { useEffect, useState } from "react";
+import { formatEther, isAddress, parseAbiItem, type Log } from "viem";
+import { usePublicClient } from "wagmi";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,9 +14,20 @@ import {
   useAdminRoles,
 } from "@/lib/hooks/use-admin";
 import { useMemberBalance, useMembers } from "@/lib/hooks/use-member-nft";
-import { useExplorerUrl } from "@/lib/hooks/use-chain";
+import { useActiveChainId, useExplorerUrl } from "@/lib/hooks/use-chain";
+import { getContracts } from "@/lib/contracts/addresses";
+import {
+  useRegistryProposal,
+  useBondOf,
+  useBatchExpire,
+  ECFPStatus,
+  ECFPStatusLabels,
+  ECFPStatusColors,
+} from "@/lib/hooks/use-ecfp-registry";
+import { abis } from "@/lib/contracts/config";
+import React from "react";
 import { truncateAddress } from "@/lib/utils/format";
-import { useAccount } from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import {
   Shield,
   UserPlus,
@@ -25,7 +37,11 @@ import {
   Search,
   Info,
   Users,
+  Inbox,
+  Zap,
+  Trash2,
 } from "lucide-react";
+
 
 export default function AdminPage() {
   const { address } = useAccount();
@@ -100,6 +116,9 @@ export default function AdminPage() {
       {(roles.isSanctionsManager || roles.isSanctionsAdmin) && (
         <SanctionsSection />
       )}
+
+      {/* ECFP Intake */}
+      {(roles.isRegistryAdmin || roles.isGovernor) && <ECFPIntakeSection />}
     </div>
   );
 }
@@ -508,5 +527,285 @@ function SanctionsSection() {
         </form>
       </div>
     </Card>
+  );
+}
+
+// ─── ECFP Intake (demo_v0.4) ─────────────────────────────────────────────────
+
+const proposalSubmittedEvent = parseAbiItem(
+  "event ProposalSubmitted(bytes32 indexed hashId, bytes32 ecfpId, address recipient, uint256 amount, bytes32 metadataCID)"
+);
+
+interface IntakeDraft {
+  hashId: `0x${string}`;
+  ecfpId: `0x${string}`;
+  recipient: `0x${string}`;
+  amount: bigint;
+  blockNumber: bigint;
+}
+
+function useIntakeDrafts() {
+  const client = usePublicClient();
+  const chainId = useActiveChainId();
+  const [drafts, setDrafts] = useState<IntakeDraft[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!client) return;
+    const c = getContracts(chainId);
+
+    async function fetchDrafts() {
+      try {
+        setIsLoading(true);
+        const logs = await client!.getLogs({
+          address: c.ecfpRegistry,
+          event: proposalSubmittedEvent,
+          fromBlock: 15_700_000n,
+          toBlock: "latest",
+        });
+
+        setDrafts(
+          logs
+            .map((log: Log<bigint, number, false, typeof proposalSubmittedEvent>) => ({
+              hashId: log.args.hashId!,
+              ecfpId: log.args.ecfpId!,
+              recipient: log.args.recipient!,
+              amount: log.args.amount!,
+              blockNumber: log.blockNumber,
+            }))
+            .reverse()
+        );
+      } catch {
+        // non-critical
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchDrafts();
+    const interval = setInterval(fetchDrafts, 30_000);
+    return () => clearInterval(interval);
+  }, [client, chainId]);
+
+  return { drafts, isLoading };
+}
+
+function ECFPIntakeSection() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
+  const { drafts, isLoading } = useIntakeDrafts();
+  const [selected, setSelected] = useState<Set<`0x${string}`>>(new Set());
+  const { batchExpire, isPending: isBatchPending, isConfirming: isBatchConfirming } = useBatchExpire();
+
+  function toggleSelect(hashId: `0x${string}`) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(hashId)) next.delete(hashId);
+      else next.add(hashId);
+      return next;
+    });
+  }
+
+  function handleBatchExpire() {
+    if (selected.size === 0) return;
+    batchExpire(Array.from(selected));
+    setSelected(new Set());
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <Inbox className="h-5 w-5 text-brand-green" />
+            ECFP Intake
+          </CardTitle>
+          {selected.size > 0 && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={handleBatchExpire}
+              disabled={isBatchPending || isBatchConfirming}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              {isBatchPending || isBatchConfirming
+                ? "Expiring…"
+                : `Expire ${selected.size} selected`}
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+
+      <div className="text-xs text-text-muted">
+        <p>
+          Review all Draft proposals. <strong>Activate</strong> legitimate
+          submissions to start governance voting. <strong>Expire &amp; Slash</strong>{" "}
+          spam or low-quality drafts — the bond is forwarded to the treasury.
+          Use batch expire to sweep multiple drafts in a single transaction.
+        </p>
+      </div>
+
+      {isLoading ? (
+        <p className="mt-4 text-sm text-text-muted">Loading drafts…</p>
+      ) : drafts.length === 0 ? (
+        <p className="mt-4 text-sm text-text-muted">No drafts in the registry.</p>
+      ) : (
+        <div className="mt-4 space-y-2">
+          {drafts.map((d) => (
+            <IntakeDraftRow
+              key={d.hashId}
+              draft={d}
+              selected={selected.has(d.hashId)}
+              onToggle={() => toggleSelect(d.hashId)}
+              registryAddress={c.ecfpRegistry}
+            />
+          ))}
+        </div>
+      )}
+    </Card>
+  );
+}
+
+function IntakeDraftRow({
+  draft,
+  selected,
+  onToggle,
+  registryAddress,
+}: {
+  draft: IntakeDraft;
+  selected: boolean;
+  onToggle: () => void;
+  registryAddress: `0x${string}`;
+}) {
+  const explorerUrl = useExplorerUrl();
+  const { data: rawProposal } = useRegistryProposal(draft.hashId);
+  const { data: bond } = useBondOf(draft.hashId);
+
+  void explorerUrl;
+
+  const proposal = rawProposal as
+    | { status: number }
+    | readonly [unknown, unknown, unknown, unknown, unknown, unknown, number]
+    | undefined;
+  const status = proposal
+    ? "status" in proposal
+      ? Number(proposal.status)
+      : Number((proposal as readonly unknown[])[6])
+    : undefined;
+
+  // Only show Draft proposals in intake
+  if (status !== undefined && status !== ECFPStatus.Draft) return null;
+
+  return (
+    <div
+      className={`flex items-center gap-3 rounded-lg border p-3 transition-colors ${
+        selected
+          ? "border-brand-green/50 bg-brand-green/5"
+          : "border-border-default bg-bg-elevated"
+      }`}
+    >
+      <input
+        type="checkbox"
+        checked={selected}
+        onChange={onToggle}
+        disabled={status !== ECFPStatus.Draft}
+        className="h-4 w-4 shrink-0 accent-brand-green"
+      />
+
+      <div className="min-w-0 flex-1 text-xs">
+        <div className="flex flex-wrap items-center gap-2">
+          {status !== undefined && (
+            <span
+              className={`rounded-full border px-2 py-0.5 text-xs font-medium ${
+                ECFPStatusColors[status as keyof typeof ECFPStatusColors] ??
+                "border-border-default bg-bg-elevated text-text-subtle"
+              }`}
+            >
+              {ECFPStatusLabels[status as keyof typeof ECFPStatusLabels] ??
+                `Status ${status}`}
+            </span>
+          )}
+          <span className="font-mono text-text-subtle">
+            {truncateAddress(draft.recipient)}
+          </span>
+          <span className="text-text-muted">
+            {formatEther(draft.amount)} ETC requested
+          </span>
+          {bond !== undefined && (bond as bigint) > 0n && (
+            <span className="font-medium text-semantic-warning">
+              Bond: {formatEther(bond as bigint)} ETC
+            </span>
+          )}
+        </div>
+        <p className="mt-1 font-mono text-text-subtle">
+          {draft.hashId.slice(0, 10)}…{draft.hashId.slice(-8)}
+          {" · Block #"}
+          {draft.blockNumber.toString()}
+        </p>
+      </div>
+
+      {status === ECFPStatus.Draft && (
+        <div className="flex shrink-0 gap-2">
+          <IntakeActionButton
+            hashId={draft.hashId}
+            registryAddress={registryAddress}
+            functionName="activateProposal"
+            label="Activate"
+            pendingLabel="Activating…"
+            variant="secondary"
+            icon={<Zap className="h-3 w-3" />}
+          />
+          <IntakeActionButton
+            hashId={draft.hashId}
+            registryAddress={registryAddress}
+            functionName="expireProposal"
+            label="Expire & Slash"
+            pendingLabel="Expiring…"
+            variant="destructive"
+            icon={<Trash2 className="h-3 w-3" />}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function IntakeActionButton({
+  hashId,
+  registryAddress,
+  functionName,
+  label,
+  pendingLabel,
+  variant,
+  icon,
+}: {
+  hashId: `0x${string}`;
+  registryAddress: `0x${string}`;
+  functionName: string;
+  label: string;
+  pendingLabel: string;
+  variant: "secondary" | "destructive";
+  icon: React.ReactNode;
+}) {
+  const { writeContract, data: hash, isPending } = useWriteContract();
+  const { isLoading: isConfirming } = useWaitForTransactionReceipt({ hash });
+
+  return (
+    <Button
+      size="sm"
+      variant={variant}
+      onClick={() =>
+        writeContract({
+          address: registryAddress,
+          abi: abis.ecfpRegistry,
+          functionName,
+          args: [hashId],
+        })
+      }
+      disabled={isPending || isConfirming}
+    >
+      {icon}
+      {isPending || isConfirming ? pendingLabel : label}
+    </Button>
   );
 }

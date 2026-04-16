@@ -11,12 +11,17 @@ import {
   useRegistryProposal,
   useWithdrawDraft,
   useMinReviewPeriod,
+  useMaxDraftsPerAddress,
+  useActiveDraftCount,
+  usePendingRefund,
+  useBondOf,
+  useClaimRefund,
   ECFPStatus,
   ECFPStatusLabels,
   ECFPStatusColors,
 } from "@/lib/hooks/use-ecfp-registry";
 import { truncateAddress } from "@/lib/utils/format";
-import { Clock, FileX, FileEdit, Info } from "lucide-react";
+import { Clock, FileX, FileEdit, Info, Coins } from "lucide-react";
 import Link from "next/link";
 
 const proposalSubmittedEvent = parseAbiItem(
@@ -92,6 +97,15 @@ function useRegistryDrafts() {
 export default function DraftsPage() {
   const { drafts, isLoading, error } = useRegistryDrafts();
   const { data: minReview } = useMinReviewPeriod();
+  const { address } = useAccount();
+  const { data: maxDrafts } = useMaxDraftsPerAddress();
+  const { data: activeDrafts } = useActiveDraftCount(address);
+  const { data: pendingRefund } = usePendingRefund(address);
+  const { claimRefund, isPending: isClaimPending } = useClaimRefund();
+
+  const hasPendingRefund = pendingRefund !== undefined && (pendingRefund as bigint) > 0n;
+  const draftsUsed = activeDrafts !== undefined ? Number(activeDrafts as bigint) : null;
+  const draftsMax = maxDrafts !== undefined ? Number(maxDrafts as bigint) : null;
 
   return (
     <div className="space-y-6">
@@ -100,6 +114,11 @@ export default function DraftsPage() {
           <h1 className="text-2xl font-bold tracking-tight">ECFP Drafts</h1>
           <p className="mt-1 text-sm text-text-muted">
             Treasury funding proposals submitted to the ECFPRegistry
+            {draftsUsed !== null && draftsMax !== null && (
+              <span className={`ml-2 text-xs font-medium ${draftsUsed >= draftsMax ? "text-semantic-error" : "text-text-subtle"}`}>
+                ({draftsUsed}/{draftsMax} draft slots used)
+              </span>
+            )}
           </p>
         </div>
         <Link href="/proposals/new">
@@ -109,6 +128,34 @@ export default function DraftsPage() {
           </Button>
         </Link>
       </div>
+
+      {hasPendingRefund && (
+        <Card className="border-brand-green/40 bg-brand-green/5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start gap-2">
+              <Coins className="mt-0.5 h-4 w-4 shrink-0 text-brand-green" />
+              <div className="text-sm">
+                <p className="font-medium text-brand-green">Pending Bond Refund</p>
+                <p className="mt-0.5 text-text-muted">
+                  <span className="font-mono font-medium text-text-primary">
+                    {formatEther(pendingRefund as bigint)} ETC
+                  </span>{" "}
+                  available to claim from an activated proposal.
+                </p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="secondary"
+              className="shrink-0 border-brand-green/40 text-brand-green hover:bg-brand-green/10"
+              onClick={() => claimRefund()}
+              disabled={isClaimPending}
+            >
+              {isClaimPending ? "Claiming…" : "Claim Refund"}
+            </Button>
+          </div>
+        </Card>
+      )}
 
       <Card>
         <div className="flex items-start gap-2">
@@ -171,6 +218,7 @@ function DraftCard({
   const explorerUrl = useExplorerUrl();
   const { symbol } = useChainMeta();
   const { data: rawProposal } = useRegistryProposal(draft.hashId);
+  const { data: bond } = useBondOf(draft.hashId);
   const {
     withdrawDraft,
     isPending: isWithdrawPending,
@@ -271,6 +319,20 @@ function DraftCard({
                 <span className="font-mono">{truncateAddress(proposer)}</span>
                 {" · Block #"}
                 {draft.blockNumber.toString()}
+              </p>
+            )}
+            {bond !== undefined && (
+              <p className="text-xs">
+                {isDraft ? (
+                  <span className="text-text-subtle">
+                    Bond at stake:{" "}
+                    <span className="font-mono font-medium text-text-secondary">
+                      {formatEther(bond as bigint)} {symbol}
+                    </span>
+                  </span>
+                ) : (
+                  <span className="text-text-subtle italic">Bond returned</span>
+                )}
               </p>
             )}
           </div>
