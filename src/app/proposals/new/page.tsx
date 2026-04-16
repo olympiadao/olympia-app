@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { abis } from "@/lib/contracts/config";
 import { useChainContracts } from "@/lib/hooks/use-chain";
 import { useCheckSanction } from "@/lib/hooks/use-admin";
-import { useSubmitDraft } from "@/lib/hooks/use-ecfp-registry";
+import { useSubmitDraft, useSubmissionBond } from "@/lib/hooks/use-ecfp-registry";
 import { ShieldAlert, FileText, Landmark } from "lucide-react";
 import { PROPOSAL_CATEGORIES } from "@/lib/utils/proposal-categories";
 
@@ -49,6 +49,7 @@ export default function NewProposalPage() {
   );
 
   // ECFPRegistry path (treasury proposals)
+  const { data: submissionBond } = useSubmissionBond();
   const {
     submit: submitDraft,
     isPending: isDraftPending,
@@ -89,7 +90,7 @@ export default function NewProposalPage() {
       const metadataCID = keccak256(toBytes(fullDescription));
       const amount = BigInt(Math.floor(parseFloat(etcAmount) * 1e18));
 
-      submitDraft(ecfpId, targetAddress as `0x${string}`, amount, metadataCID);
+      submitDraft(ecfpId, targetAddress as `0x${string}`, amount, metadataCID, (submissionBond as bigint | undefined) ?? 0n);
     } else {
       // Signaling proposals go directly to Governor
       writeContract({

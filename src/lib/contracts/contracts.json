@@ -2,6 +2,7 @@
   "version": "0.3",
   "salt": "OLYMPIA_DEMO_V0_3",
   "deployer": "0xAF21767a2c5b3acFFB64dC64CD5A876e91155bD0",
+  "_note": "demo_v0.4 addresses pending deployment — run PrecomputeAddresses.s.sol then deploy scripts. Update version, salt, deployer, and all addresses here after deployment.",
   "contracts": {
     "governor": {
       "name": "OlympiaGovernor",

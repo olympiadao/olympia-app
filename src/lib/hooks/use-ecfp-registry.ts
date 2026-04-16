@@ -57,13 +57,15 @@ export function useSubmitDraft() {
     ecfpId: `0x${string}`,
     recipient: `0x${string}`,
     amount: bigint,
-    metadataCID: `0x${string}`
+    metadataCID: `0x${string}`,
+    value: bigint
   ) {
     writeContract({
       address: c.ecfpRegistry,
       abi: abis.ecfpRegistry,
       functionName: "submit",
       args: [ecfpId, recipient, amount, metadataCID],
+      value,
     });
   }
 
@@ -209,4 +211,133 @@ export function useWatchRegistrySubmissions() {
   const reset = useCallback(() => setEvents([]), []);
 
   return { events, reset };
+}
+
+// --- Submission Bond (demo_v0.4) ---
+
+export function useSubmissionBond() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
+  return useReadContract({
+    address: c.ecfpRegistry,
+    abi: abis.ecfpRegistry,
+    functionName: "submissionBond",
+  });
+}
+
+// --- Max Drafts Per Address (demo_v0.4) ---
+
+export function useMaxDraftsPerAddress() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
+  return useReadContract({
+    address: c.ecfpRegistry,
+    abi: abis.ecfpRegistry,
+    functionName: "maxDraftsPerAddress",
+  });
+}
+
+// --- Active Draft Count (demo_v0.4) ---
+
+export function useActiveDraftCount(address?: `0x${string}`) {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
+  return useReadContract({
+    address: c.ecfpRegistry,
+    abi: abis.ecfpRegistry,
+    functionName: "activeDraftCount",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+}
+
+// --- Pending Refund (demo_v0.4) ---
+
+export function usePendingRefund(address?: `0x${string}`) {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
+  return useReadContract({
+    address: c.ecfpRegistry,
+    abi: abis.ecfpRegistry,
+    functionName: "pendingRefunds",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+}
+
+// --- Bond Of (demo_v0.4) ---
+
+export function useBondOf(hashId?: `0x${string}`) {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
+  return useReadContract({
+    address: c.ecfpRegistry,
+    abi: abis.ecfpRegistry,
+    functionName: "bondOf",
+    args: hashId ? [hashId] : undefined,
+    query: { enabled: !!hashId },
+  });
+}
+
+// --- Claim Refund (demo_v0.4) ---
+
+export function useClaimRefund() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } =
+    useWaitForTransactionReceipt({ hash });
+
+  function claimRefund() {
+    writeContract({
+      address: c.ecfpRegistry,
+      abi: abis.ecfpRegistry,
+      functionName: "claimRefund",
+      args: [],
+    });
+  }
+
+  return { claimRefund, hash, isPending, isConfirming, isSuccess, error };
+}
+
+// --- Batch Expire (demo_v0.4, GOVERNOR_ROLE only) ---
+
+export function useBatchExpire() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } =
+    useWaitForTransactionReceipt({ hash });
+
+  function batchExpire(hashIds: `0x${string}`[]) {
+    writeContract({
+      address: c.ecfpRegistry,
+      abi: abis.ecfpRegistry,
+      functionName: "batchExpire",
+      args: [hashIds],
+    });
+  }
+
+  return { batchExpire, hash, isPending, isConfirming, isSuccess, error };
+}
+
+// --- Set Submission Bond (demo_v0.4, DEFAULT_ADMIN_ROLE only) ---
+
+export function useSetSubmissionBond() {
+  const chainId = useActiveChainId();
+  const c = getContracts(chainId);
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } =
+    useWaitForTransactionReceipt({ hash });
+
+  function setSubmissionBond(newBond: bigint) {
+    writeContract({
+      address: c.ecfpRegistry,
+      abi: abis.ecfpRegistry,
+      functionName: "setSubmissionBond",
+      args: [newBond],
+    });
+  }
+
+  return { setSubmissionBond, hash, isPending, isConfirming, isSuccess, error };
 }
